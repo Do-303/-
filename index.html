@@ -1,0 +1,2477 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#0B0B10" />
+<title>한경 부트캠프 톡</title>
+<!-- 글꼴: 본문·제목 = Pretendard(잘 읽히는 깔끔한 한글 글꼴), 시간·숫자 포인트 = Orbit(미래적인 글꼴) / 둘 다 무료 -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Orbit&display=swap" rel="stylesheet" />
+<script>
+  // 저장된 테마를 화면 그리기 전에 먼저 적용 (깜빡임 방지). 기본값은 다크 모드
+  try {
+    if (localStorage.getItem("hk_theme") === "light") document.documentElement.dataset.theme = "light";
+    const v = JSON.parse(localStorage.getItem("hk_accent_vars") || "null");   // 고른 포인트 색상
+    if (v) Object.entries(v).forEach(([k, val]) => document.documentElement.style.setProperty(k, val));
+  } catch {}
+</script>
+<style>
+  /* =========================================================
+     1. 디자인 토큰 — 올블랙 + 연보라 그라데이션 + 유리(글래스) 질감
+     ========================================================= */
+  :root {
+    --bg: #050507;                 /* 가장 바깥 바탕 */
+    --surface: #0B0B10;            /* 화면 바탕 */
+    --text: #F1EEFA;               /* 기본 글자 */
+    --sub-text: #A7A2B8;           /* 보조 글자 */
+    --muted: #6F6A80;              /* 흐린 글자 */
+    --line: rgba(255,255,255,.07);
+    --divider: rgba(var(--acc-rgb),.09);  /* 친구 목록 구분선 (티 날 듯 안 날 듯) */
+
+    /* 포인트: 연보라 그라데이션 */
+    /* 포인트 색 원본 (색상 고르기에서 바뀌어요) */
+    --acc-d1: #E4D9FF; --acc-d2: #B9A2FF;          /* 다크 모드 포인트 글자 */
+    --acc-l1: #5B3FD6; --acc-l2: #7C5CFF;          /* 라이트 모드 포인트 글자 */
+    --acc-rgb: 185,162,255; --acc2-rgb: 146,119,255; /* 은은한 배경·빛 번짐 */
+    --g1: #EDE4FF; --g2: #C3AEFF; --g3: #9277FF;   /* 그라데이션 3색 */
+
+    --lav-1: var(--acc-d1);
+    --lav-2: var(--acc-d2);
+    --lav-3: #8B6CFF;
+    --accent: var(--acc-d2);
+    --grad: linear-gradient(135deg, var(--g1) 0%, var(--g2) 45%, var(--g3) 100%);
+    --grad-soft: linear-gradient(135deg, rgba(var(--acc-rgb),.22), rgba(var(--acc2-rgb),.10));
+
+    /* 유리(거울) 질감 */
+    --glass: rgba(255,255,255,.055);
+    --glass-strong: rgba(22,20,30,.72);
+    --glass-border: rgba(255,255,255,.10);
+    --sheen: linear-gradient(180deg, rgba(255,255,255,.14) 0%, rgba(255,255,255,0) 45%);
+
+    /* 글꼴 */
+    --font-display: "Pretendard Variable", Pretendard, -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;  /* 제목·이름 (굵게) */
+    --font-body: "Pretendard Variable", Pretendard, -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;     /* 대화·본문 */
+    --font-tech: "Orbit", "Pretendard Variable", monospace;   /* 시간·날짜 같은 작은 포인트 */
+
+    --danger: #FF6B81;
+    --ok: #7EE2B8;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; }
+  body {
+    font-family: var(--font-body);
+    background: var(--bg); color: var(--text);
+    display: flex; justify-content: center;
+    -webkit-font-smoothing: antialiased;
+  }
+  button { font-family: inherit; color: inherit; }
+  ::selection { background: rgba(var(--acc-rgb),.35); }
+
+  /* 앱 프레임 + 뒤에서 은은하게 번지는 보라 빛 */
+  .app {
+    position: relative; width: 100%; max-width: 420px; height: 100dvh;
+    background: var(--surface); overflow: hidden; overflow: clip; isolation: isolate;   /* clip: 숨은 창이 밀려 보이지 않게 */
+  }
+  .app::before {
+    content: ""; position: absolute; inset: -20%; z-index: -1; pointer-events: none;
+    background:
+      radial-gradient(40% 30% at 85% 8%, rgba(var(--acc-rgb),.30), transparent 70%),
+      radial-gradient(45% 35% at 5% 60%, rgba(var(--acc2-rgb),.18), transparent 70%),
+      radial-gradient(35% 25% at 70% 100%, rgba(var(--acc-rgb),.14), transparent 70%);
+    filter: blur(10px);
+  }
+  @media (min-width: 480px) {
+    body { align-items: center; background: radial-gradient(60% 60% at 50% 40%, #15121f 0%, #050507 70%); }
+    .app {
+      height: min(860px, 96dvh); border-radius: 40px;
+      border: 1px solid rgba(255,255,255,.14);
+      box-shadow: 0 0 0 8px #0d0d12, 0 0 0 9px rgba(255,255,255,.08), 0 40px 100px rgba(0,0,0,.7), 0 0 120px rgba(var(--acc2-rgb),.18);
+    }
+  }
+
+  /* 화면 두 개: 친구 목록 / 채팅방 (배경은 투명 → 보라 빛이 비쳐 보임) */
+  .screen { position: absolute; inset: 0; display: flex; flex-direction: column; background: transparent; }
+  .screen.chat {
+    background: var(--surface); transform: translateX(100%); transition: transform .3s cubic-bezier(.2,.8,.2,1); z-index: 2; isolation: isolate;
+  }
+  .screen.chat::before {
+    content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+    background:
+      radial-gradient(50% 30% at 100% 0%, rgba(var(--acc-rgb),.22), transparent 70%),
+      radial-gradient(50% 30% at 0% 100%, rgba(var(--acc2-rgb),.16), transparent 70%);
+  }
+  .screen.chat.open { transform: translateX(0); }
+
+  .icon-btn {
+    width: 40px; height: 40px; border: 0; background: transparent; border-radius: 50%;
+    display: grid; place-items: center; cursor: pointer; color: var(--text); flex-shrink: 0;
+  }
+  .icon-btn:active { background: rgba(255,255,255,.08); }
+
+  /* 공통 유리 패널 */
+  .glass {
+    background: var(--glass); border: 1px solid var(--glass-border);
+    backdrop-filter: blur(18px) saturate(140%); -webkit-backdrop-filter: blur(18px) saturate(140%);
+  }
+
+  /* =========================================================
+     2. 친구 목록 화면
+     ========================================================= */
+  .list-header {
+    display: flex; align-items: center; gap: 2px;
+    padding: calc(16px + env(safe-area-inset-top)) 8px 8px 22px;
+  }
+  .list-header h1 {
+    flex: 1; font-size: 26px; font-weight: 800; letter-spacing: -.5px;
+    background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .list-body { flex: 1; overflow-y: auto; padding-bottom: 24px; }
+  .section-title { font-size: 11.5px; letter-spacing: .4px; color: var(--muted); padding: 16px 22px 8px; }
+  .friend {
+    position: relative; display: flex; align-items: center; gap: 14px; width: calc(100% - 24px); margin: 0 12px 6px;
+    padding: 10px 12px; border: 1px solid transparent; background: transparent; text-align: left; cursor: pointer; border-radius: 18px;
+    transition: background .2s, border-color .2s;
+  }
+  .friend { transition: background .2s, border-color .2s; }
+  .friend::after { transition: opacity .2s; }
+  .friend:hover { background: var(--glass); border-color: var(--glass-border); }
+  /* 사람과 사람 사이 구분선: 프로필 오른쪽에서 시작해 끝으로 갈수록 사라지는 아주 옅은 선 */
+  .friend::after {
+    content: ""; position: absolute; left: 76px; right: 8px; bottom: -4px; height: 1px; pointer-events: none;
+    background: linear-gradient(90deg, var(--divider) 0%, var(--divider) 55%, transparent 100%);
+  }
+  .friend:hover::after, .friend:has(+ .friend:hover)::after { opacity: 0; }   /* 마우스를 올린 줄 주변은 선 숨기기 */
+  .friend:has(+ .section-title)::after, .friend:has(+ .add-row)::after,
+  .friend:has(+ .list-note)::after, .friend:last-child::after, .add-row::after { display: none; }      /* 묶음의 마지막 줄엔 선 없음 */
+  .friend:active { background: rgba(var(--acc-rgb),.10); }
+  .friend .info { flex: 1; min-width: 0; }
+  .friend .fname { font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 6px; color: var(--text); }
+  .friend .tag { font-size: 10px; font-weight: 700; color: #1A1230; background: var(--grad); padding: 2px 7px; border-radius: 20px; }
+  .friend .preview { font-size: 12.5px; color: var(--sub-text); margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .friend .when { font-size: 11px; color: var(--muted); align-self: flex-start; margin-top: 4px; white-space: nowrap; }
+  .add-row .fname { color: var(--lav-2) !important; }
+  .add-row .plus {
+    width: 50px; height: 50px; border-radius: 18px; display: grid; place-items: center; font-size: 24px; flex-shrink: 0;
+    color: var(--lav-2); border: 1px dashed rgba(var(--acc-rgb),.45); background: rgba(var(--acc-rgb),.06);
+  }
+  .list-note { font-size: 11.5px; color: var(--muted); text-align: center; padding: 18px 28px 4px; line-height: 1.6; }
+  .key-banner {
+    margin: 6px 12px 4px; padding: 14px 16px; border-radius: 18px; width: calc(100% - 24px);
+    font-size: 13px; line-height: 1.5; display: flex; gap: 12px; align-items: center; cursor: pointer; text-align: left;
+    color: var(--text); background: var(--grad-soft); border: 1px solid rgba(var(--acc-rgb),.35);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.12);
+  }
+  .key-banner b { display: block; color: var(--lav-1); }
+
+  /* 아바타: 유리 테두리 + 윗면 반사광 */
+  .avatar {
+    position: relative; border-radius: 36%; overflow: hidden; flex-shrink: 0;
+    display: grid; place-items: center; color: #fff; font-weight: 700;
+    box-shadow: 0 0 0 1px rgba(255,255,255,.14), 0 6px 18px rgba(0,0,0,.45);
+  }
+  .avatar::after { content: ""; position: absolute; inset: 0; background: var(--sheen); pointer-events: none; }
+  .avatar svg { width: 100%; height: 100%; display: block; }
+  .avatar.lg { width: 50px; height: 50px; font-size: 22px; }
+  .avatar.sm { width: 38px; height: 38px; font-size: 18px; }
+
+  /* =========================================================
+     3. 채팅방 화면
+     ========================================================= */
+  .chat-header {
+    display: flex; align-items: center; gap: 6px;
+    padding: calc(10px + env(safe-area-inset-top)) 8px 10px;
+    background: rgba(11,11,16,.55); border-bottom: 1px solid var(--line);
+    backdrop-filter: blur(20px) saturate(150%); -webkit-backdrop-filter: blur(20px) saturate(150%);
+    flex-shrink: 0; z-index: 1;
+  }
+  .chat-header .title { flex: 1; min-width: 0; }
+  .chat-header .title strong { font-size: 16.5px; font-weight: 700; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .chat-header .title span { font-size: 11.5px; color: var(--sub-text); }
+  .status-dot { display:inline-block; width:7px; height:7px; border-radius:50%; background: var(--lav-2); margin-right:5px; vertical-align: 1px; box-shadow: 0 0 8px var(--lav-2); }
+  .status-dot.off { background: #4A4658; box-shadow: none; }
+
+  .messages { flex: 1; overflow-y: auto; padding: 10px 14px 18px; }
+  .date-divider { display: flex; justify-content: center; margin: 10px 0 14px; }
+  .date-divider span {
+    font-size: 11.5px; color: var(--sub-text); padding: 5px 14px; border-radius: 20px;
+    background: var(--glass); border: 1px solid var(--glass-border);
+  }
+  .notice {
+    font-size: 11.5px; color: var(--muted); text-align: center; line-height: 1.55;
+    border-radius: 14px; padding: 10px 14px; margin: 0 10px 16px;
+    background: rgba(255,255,255,.03); border: 1px solid var(--line);
+  }
+
+  .group { display: flex; gap: 9px; margin-bottom: 12px; }
+  .group.me { justify-content: flex-end; }
+  .stack { display: flex; flex-direction: column; gap: 5px; max-width: 78%; min-width: 0; }
+  .group.me .stack { align-items: flex-end; }
+  .name { font-size: 12px; color: var(--sub-text); margin: 2px 0 2px 4px; }
+  .row { display: flex; align-items: flex-end; gap: 6px; }
+  .group.me .row { flex-direction: row-reverse; }
+
+  /* 말풍선: 상대 = 어두운 유리 / 나 = 연보라 그라데이션 거울 */
+  .bubble {
+    position: relative; overflow: hidden;
+    padding: 9px 13px; font-size: 14.5px; line-height: 1.55; border-radius: 18px;
+    word-break: keep-all; overflow-wrap: anywhere; white-space: pre-wrap; max-width: 100%;
+  }
+  .bubble { isolation: isolate; }   /* 반사광을 글씨 '뒤'에 두기 위한 설정 */
+  .bubble::before { content: ""; position: absolute; inset: 0; z-index: -1; background: var(--sheen); pointer-events: none; border-radius: inherit; }
+  .group.bot .bubble {
+    color: var(--text); background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.10);
+    backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
+  }
+  .group.me .bubble {
+    color: #160F2B; font-weight: 500; background: var(--grad);
+    box-shadow: 0 6px 22px rgba(var(--acc2-rgb),.28), inset 0 1px 0 rgba(255,255,255,.6);
+  }
+  .group.bot .name + .row .bubble { border-top-left-radius: 6px; }
+  .group.me .row:first-child .bubble { border-top-right-radius: 6px; }
+  .bubble.error { background: rgba(255,107,129,.10) !important; color: #FFB3BF !important; border: 1px solid rgba(255,107,129,.35) !important; }
+  .bubble a.link {
+    position: relative; display: inline-block; margin: 4px 0 2px; color: var(--lav-1); font-weight: 600; text-decoration: none;
+    background: rgba(var(--acc-rgb),.14); border: 1px solid rgba(var(--acc-rgb),.35); padding: 3px 10px; border-radius: 10px; font-size: 12.5px;
+  }
+  .group.me .bubble a.link { color: #241A45; background: rgba(255,255,255,.45); border-color: rgba(255,255,255,.6); }
+  .meta { display: flex; flex-direction: column; align-items: flex-end; flex-shrink: 0; }
+  .group.bot .meta { align-items: flex-start; }
+  .meta .read { font-size: 10.5px; font-weight: 800; color: var(--lav-2); line-height: 1; }
+  .meta .time { font-size: 10px; color: var(--muted); white-space: nowrap; }
+
+  .typing { display: inline-flex; gap: 5px; padding: 13px 15px; }
+  .typing i { width: 6px; height: 6px; border-radius: 50%; background: var(--lav-2); animation: blink 1.2s infinite; }
+  .typing i:nth-child(2) { animation-delay: .2s; }
+  .typing i:nth-child(3) { animation-delay: .4s; }
+  @keyframes blink { 0%, 80%, 100% { opacity: .25; transform: translateY(0); } 40% { opacity: 1; transform: translateY(-3px); } }
+
+  .chips { display: flex; gap: 7px; overflow-x: auto; padding: 8px 14px 10px; flex-shrink: 0; scrollbar-width: none; }
+  .chips::-webkit-scrollbar { display: none; }
+  .chip {
+    flex-shrink: 0; font-size: 12.5px; padding: 7px 13px; border-radius: 20px; cursor: pointer; color: var(--lav-1);
+    background: rgba(var(--acc-rgb),.08); border: 1px solid rgba(var(--acc-rgb),.28);
+    transition: background .2s, border-color .2s;
+  }
+  .chip:hover { background: rgba(var(--acc-rgb),.16); border-color: rgba(var(--acc-rgb),.5); }
+
+  /* 입력창: 떠 있는 유리 캡슐 */
+  .composer {
+    display: flex; align-items: flex-end; gap: 8px; flex-shrink: 0;
+    margin: 0 10px calc(10px + env(safe-area-inset-bottom)); padding: 6px 6px 6px 16px; border-radius: 26px;
+    background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12);
+    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 10px 30px rgba(0,0,0,.4);
+  }
+  .composer:focus-within { border-color: rgba(var(--acc-rgb),.55); box-shadow: 0 0 0 3px rgba(var(--acc-rgb),.12), 0 10px 30px rgba(0,0,0,.4); }
+  .composer textarea {
+    flex: 1; resize: none; border: 0; outline: none; font: inherit; font-size: 15px;
+    max-height: 110px; min-height: 38px; padding: 9px 0; line-height: 1.35; background: transparent; color: var(--text);
+  }
+  .composer textarea::placeholder { color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .send {
+    height: 38px; min-width: 38px; padding: 0 14px; border: 0; border-radius: 20px;
+    background: rgba(255,255,255,.08); color: var(--muted); font-weight: 700; font-size: 13.5px; cursor: not-allowed;
+    transition: background .2s, box-shadow .2s, color .2s;
+  }
+  .send.active { background: var(--grad); color: #160F2B; cursor: pointer; box-shadow: 0 4px 16px rgba(var(--acc2-rgb),.45); }
+
+  /* =========================================================
+     4. 아래에서 올라오는 시트 (설정 · 캐릭터 · 메뉴)
+     ========================================================= */
+  .dim { position: absolute; inset: 0; background: rgba(0,0,0,.55); opacity: 0; pointer-events: none; transition: opacity .25s; z-index: 10; backdrop-filter: blur(2px); }
+  .dim.show { opacity: 1; pointer-events: auto; }
+  .sheet {
+    position: absolute; left: 0; right: 0; bottom: 0; z-index: 11; color: var(--text);
+    background: linear-gradient(180deg, rgba(30,26,44,.92), rgba(14,13,20,.96));
+    border-top: 1px solid rgba(255,255,255,.14);
+    backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+    border-radius: 26px 26px 0 0; padding: 10px 20px calc(22px + env(safe-area-inset-bottom));
+    transform: translateY(100%); transition: transform .3s cubic-bezier(.2,.8,.2,1); max-height: 92%; overflow-y: auto;
+    box-shadow: 0 -20px 60px rgba(0,0,0,.5);
+  }
+  .sheet.show { transform: translateY(0); }
+  .grabber { width: 40px; height: 4px; border-radius: 2px; background: rgba(255,255,255,.2); margin: 0 auto 16px; }
+  .sheet h2 { font-size: 18px; margin-bottom: 4px; }
+  .sheet .desc { font-size: 13px; color: var(--sub-text); line-height: 1.6; margin-bottom: 18px; }
+  .field { margin-bottom: 14px; }
+  .field label, .field .label { display: block; font-size: 12.5px; font-weight: 600; margin-bottom: 7px; color: var(--sub-text); }
+  .field .opt { font-weight: 400; color: var(--muted); }
+  .input-wrap, .text-input, .field select, .field textarea {
+    background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.10); color: var(--text); border-radius: 14px;
+  }
+  .input-wrap { display: flex; align-items: center; padding: 0 4px 0 14px; }
+  .input-wrap:focus-within, .text-input:focus, .field textarea:focus, .field select:focus {
+    border-color: rgba(var(--acc-rgb),.6); box-shadow: 0 0 0 3px rgba(var(--acc-rgb),.12);
+  }
+  .input-wrap input { flex: 1; border: 0; outline: none; font: inherit; font-size: 14px; padding: 13px 0; background: transparent; min-width: 0; color: var(--text); }
+  .text-input, .field select, .field textarea { width: 100%; padding: 12px 14px; font: inherit; font-size: 14px; outline: none; }
+  .field select option { background: #16141e; color: var(--text); }
+  .field textarea { resize: vertical; min-height: 100px; line-height: 1.55; }
+  input::placeholder, textarea::placeholder { color: var(--muted); }
+  input:disabled, textarea:disabled { opacity: .7; }
+  .check { display: flex; gap: 10px; align-items: flex-start; font-size: 13px; color: var(--text); line-height: 1.5; margin-bottom: 14px; cursor: pointer; }
+  .check input { margin-top: 3px; accent-color: var(--lav-2); width: 16px; height: 16px; }
+  .check .hint { color: var(--muted); }
+  .help { font-size: 12px; color: var(--muted); margin-top: 7px; line-height: 1.5; }
+  .help a { color: var(--lav-2); }
+  .msg { font-size: 12.5px; margin: -4px 0 12px; min-height: 18px; color: var(--sub-text); }
+  .msg.ok { color: var(--ok); } .msg.bad { color: var(--danger); }
+  .btn { width: 100%; height: 50px; border: 0; border-radius: 16px; font-size: 15px; font-weight: 700; cursor: pointer; }
+  .btn.primary {
+    background: var(--grad); color: #160F2B; position: relative; overflow: hidden;
+    box-shadow: 0 8px 24px rgba(var(--acc2-rgb),.35), inset 0 1px 0 rgba(255,255,255,.6);
+  }
+  .btn.primary:active { transform: scale(.99); }
+  .btn.ghost { background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1); color: var(--text); margin-top: 8px; }
+  .btn.danger { background: transparent; color: var(--danger); font-weight: 600; margin-top: 4px; height: 42px; }
+  .btn.link { background: transparent; color: var(--lav-2); height: 36px; font-weight: 600; font-size: 13px; width: auto; padding: 0 4px; }
+  .security {
+    border-radius: 16px; padding: 13px 15px; font-size: 12.5px; color: var(--sub-text); line-height: 1.65; margin-top: 16px;
+    background: rgba(255,255,255,.04); border: 1px solid var(--line);
+  }
+  .security b { color: var(--lav-1); }
+  .divider { height: 1px; background: var(--line); margin: 16px 0 8px; }
+
+  .profile-pick { display: flex; align-items: center; gap: 14px; }
+  .emoji-input { width: 64px; text-align: center; font-size: 22px; padding: 8px !important; }
+  .colors { display: flex; gap: 9px; flex-wrap: wrap; }
+  .color { width: 28px; height: 28px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; box-shadow: inset 0 1px 0 rgba(255,255,255,.35); }
+  .color.on { border-color: #fff; box-shadow: 0 0 0 3px rgba(var(--acc-rgb),.4); }
+  .sheet-head { display: flex; align-items: center; justify-content: space-between; }
+
+  .menu-item { display: block; width: 100%; text-align: left; border: 0; background: transparent; font-size: 15px; padding: 15px 4px; cursor: pointer; border-bottom: 1px solid var(--line); color: var(--text); }
+  .menu-item:last-child { border-bottom: 0; }
+  .menu-item.red { color: var(--danger); }
+
+  /* =========================================================
+     5. 글꼴 스타일 — 잘 읽히게, 대신 제목은 크롬 그라데이션으로 화려하게
+     ========================================================= */
+  .list-header h1 {
+    font-family: var(--font-display); font-weight: 900; font-size: 34px; letter-spacing: -1.4px; line-height: 1.1;
+    background: linear-gradient(120deg, #FFFFFF 0%, var(--g1) 30%, var(--g2) 58%, #FFFFFF 78%, var(--g3) 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    filter: drop-shadow(0 0 16px rgba(var(--acc-rgb),.45));
+  }
+  .chat-header .title strong {
+    font-family: var(--font-display); font-weight: 800; font-size: 17px; letter-spacing: -.5px;
+    background: linear-gradient(120deg, #FFFFFF, var(--g1) 55%, var(--g2));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .sheet h2 {
+    font-family: var(--font-display); font-weight: 800; font-size: 21px; letter-spacing: -.6px;
+    background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .friend .fname { font-family: var(--font-display); font-weight: 700; font-size: 15.5px; letter-spacing: -.3px; }
+  .add-row .fname { color: var(--lav-2) !important; }
+  .name { font-family: var(--font-display); font-weight: 600; font-size: 12.5px; color: var(--lav-1); letter-spacing: -.2px; }
+  .btn.primary { font-family: var(--font-display); font-weight: 800; font-size: 15.5px; letter-spacing: -.3px; }
+  .send { font-family: var(--font-display); font-weight: 800; font-size: 13.5px; }
+  .section-title { font-family: var(--font-display); font-weight: 700; font-size: 11.5px; color: var(--lav-2); letter-spacing: .6px; }
+  .bubble { font-family: var(--font-body); font-size: 15px; letter-spacing: -.25px; line-height: 1.55; }
+  .group.me .bubble { font-weight: 600; }
+  /* 작은 숫자 포인트: 미래적인 Orbit */
+  .meta .time, .friend .when { font-family: var(--font-tech); font-size: 10px; letter-spacing: .2px; }
+  .date-divider span { font-family: var(--font-tech); font-size: 11px; color: var(--lav-1); letter-spacing: .3px; }
+  .meta .read { font-family: var(--font-tech); }
+
+
+  /* =========================================================
+     6. 라이트 모드 — 같은 연보라 포인트를 밝은 유리 위에
+     (html 태그에 data-theme="light"가 붙으면 아래 값으로 바뀌어요)
+     ========================================================= */
+  :root[data-theme="light"] {
+    --bg: #ECE8F6;
+    --surface: #F8F6FD;
+    --text: #1B1530;
+    --sub-text: #5E5874;
+    --muted: #9590A8;
+    --line: rgba(60,30,130,.09);
+    --divider: rgba(var(--acc2-rgb),.10);
+    --lav-1: var(--acc-l1);   /* 밝은 바탕에선 한 단계 진한 포인트색이 잘 보여요 */
+    --lav-2: var(--acc-l2);
+    --accent: var(--acc-l2);
+    --grad-soft: linear-gradient(135deg, rgba(var(--acc-rgb),.35), rgba(var(--acc2-rgb),.12));
+    --glass: rgba(255,255,255,.65);
+    --glass-border: rgba(var(--acc2-rgb),.16);
+    --sheen: linear-gradient(180deg, rgba(255,255,255,.55) 0%, rgba(255,255,255,0) 50%);
+    --danger: #D9364F;
+    --ok: #1E9E6A;
+  }
+  [data-theme="light"] ::selection { background: rgba(var(--acc2-rgb),.22); }
+  [data-theme="light"] .app::before {
+    background:
+      radial-gradient(40% 30% at 85% 8%, rgba(var(--acc-rgb),.35), transparent 70%),
+      radial-gradient(45% 35% at 5% 60%, rgba(var(--acc-rgb),.35), transparent 70%),
+      radial-gradient(35% 25% at 70% 100%, rgba(var(--acc2-rgb),.20), transparent 70%);
+  }
+  [data-theme="light"] .screen.chat::before {
+    background:
+      radial-gradient(50% 30% at 100% 0%, rgba(var(--acc-rgb),.25), transparent 70%),
+      radial-gradient(50% 30% at 0% 100%, rgba(var(--acc-rgb),.30), transparent 70%);
+  }
+  @media (min-width: 480px) {
+    [data-theme="light"] body { background: radial-gradient(60% 60% at 50% 40%, #FFFFFF 0%, #E3DDF3 70%); }
+    [data-theme="light"] .app {
+      border-color: rgba(255,255,255,.9);
+      box-shadow: 0 0 0 8px #FFFFFF, 0 0 0 9px rgba(var(--acc2-rgb),.12), 0 40px 100px rgba(var(--acc2-rgb),.18), 0 0 120px rgba(var(--acc2-rgb),.18);
+    }
+  }
+  [data-theme="light"] .icon-btn:active { background: rgba(60,30,130,.07); }
+  [data-theme="light"] .friend:active { background: rgba(var(--acc2-rgb),.10); }
+  [data-theme="light"] .avatar { box-shadow: 0 0 0 1px rgba(255,255,255,.8), 0 6px 16px rgba(var(--acc2-rgb),.18); }
+  [data-theme="light"] .list-header h1 {
+    background: linear-gradient(120deg, #1B1530 0%, var(--acc-l1) 40%, var(--g3) 65%, var(--acc-l1) 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    filter: drop-shadow(0 0 14px rgba(var(--acc2-rgb),.30));
+  }
+  [data-theme="light"] .chat-header { background: rgba(248,246,253,.72); }
+  [data-theme="light"] .chat-header .title strong {
+    background: linear-gradient(120deg, #1B1530, var(--acc-l1) 60%, var(--acc-l2));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  [data-theme="light"] .sheet h2 {
+    background: linear-gradient(120deg, #1B1530, var(--acc-l1) 60%, var(--acc-l2));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  [data-theme="light"] .status-dot.off { background: #C9C3DA; }
+  [data-theme="light"] .notice { background: rgba(255,255,255,.55); }
+  [data-theme="light"] .group.bot .bubble {
+    background: rgba(255,255,255,.78); border-color: rgba(var(--acc2-rgb),.14);
+    box-shadow: 0 4px 14px rgba(var(--acc2-rgb),.08), inset 0 1px 0 #fff;
+  }
+  [data-theme="light"] .group.me .bubble { box-shadow: 0 6px 20px rgba(var(--acc2-rgb),.28), inset 0 1px 0 rgba(255,255,255,.7); }
+  [data-theme="light"] .bubble.error { color: #B4233A !important; }
+  [data-theme="light"] .bubble a.link { background: rgba(var(--acc2-rgb),.10); border-color: rgba(var(--acc2-rgb),.30); }
+  [data-theme="light"] .chip { background: rgba(255,255,255,.7); border-color: rgba(var(--acc2-rgb),.28); }
+  [data-theme="light"] .chip:hover { background: rgba(var(--acc2-rgb),.10); }
+  [data-theme="light"] .composer {
+    background: rgba(255,255,255,.78); border-color: rgba(var(--acc2-rgb),.18);
+    box-shadow: inset 0 1px 0 #fff, 0 10px 30px rgba(var(--acc2-rgb),.12);
+  }
+  [data-theme="light"] .composer:focus-within { border-color: rgba(var(--acc2-rgb),.55); box-shadow: 0 0 0 3px rgba(var(--acc2-rgb),.12), 0 10px 30px rgba(var(--acc2-rgb),.12); }
+  [data-theme="light"] .send { background: rgba(60,30,130,.06); }
+  [data-theme="light"] .send.active { background: var(--grad); }
+  [data-theme="light"] .dim { background: rgba(30,15,60,.30); }
+  [data-theme="light"] .sheet {
+    background: linear-gradient(180deg, rgba(255,255,255,.96), rgba(246,242,255,.98));
+    border-top-color: rgba(255,255,255,.9); box-shadow: 0 -20px 60px rgba(var(--acc2-rgb),.18);
+  }
+  [data-theme="light"] .grabber { background: rgba(60,30,130,.15); }
+  [data-theme="light"] .input-wrap, [data-theme="light"] .text-input,
+  [data-theme="light"] .field select, [data-theme="light"] .field textarea { background: #FFFFFF; border-color: rgba(var(--acc2-rgb),.18); }
+  [data-theme="light"] .field select option { background: #FFFFFF; }
+  [data-theme="light"] .btn.ghost, [data-theme="light"] .security { background: rgba(var(--acc2-rgb),.05); border-color: rgba(var(--acc2-rgb),.12); }
+  [data-theme="light"] .color.on { border-color: #1B1530; }
+  [data-theme="light"] .add-row .plus { background: rgba(var(--acc2-rgb),.06); }
+
+  /* 다크·라이트 전환 버튼 (다크 = 초승달, 라이트 = 해) */
+  .theme-btn svg { transition: transform .45s cubic-bezier(.2,.8,.2,1), opacity .3s; }
+  .theme-btn .sun { display: none; }
+  [data-theme="light"] .theme-btn .moon { display: none; }
+  [data-theme="light"] .theme-btn .sun { display: block; color: #F2A93B; }
+  .theme-btn .moon { color: var(--lav-1); filter: drop-shadow(0 0 6px rgba(var(--acc-rgb),.7)); }
+  .theme-btn.spin svg { transform: rotate(-90deg) scale(.6); opacity: 0; }
+  body, .app, .screen.chat, .sheet, .bubble, .composer, .chat-header { transition: background-color .35s, color .35s, border-color .35s; }
+
+  /* 스크롤바 */
+  .list-body::-webkit-scrollbar, .messages::-webkit-scrollbar, .sheet::-webkit-scrollbar { width: 4px; }
+  .list-body::-webkit-scrollbar-thumb, .messages::-webkit-scrollbar-thumb, .sheet::-webkit-scrollbar-thumb { background: rgba(var(--acc-rgb),.25); border-radius: 4px; }
+
+  /* =========================================================
+     7. 새 기능 스타일 — 스트리밍 · 사진 첨부 · 단톡방 · 색상 고르기
+     ========================================================= */
+  /* 답이 써지는 중일 때 깜빡이는 커서 */
+  .bubble.streaming::after { content: "▍"; margin-left: 1px; color: var(--lav-2); animation: caret 1s steps(1) infinite; }
+  @keyframes caret { 50% { opacity: 0; } }
+
+  /* 사진 첨부 버튼 · 미리보기 */
+  .composer { padding-left: 6px; }
+  .attach-btn {
+    width: 38px; height: 38px; border-radius: 50%; border: 0; flex-shrink: 0; cursor: pointer; display: grid; place-items: center;
+    color: var(--lav-2); background: rgba(var(--acc-rgb),.12); transition: background .2s, transform .2s;
+  }
+  .attach-btn:hover { background: rgba(var(--acc-rgb),.22); transform: rotate(90deg); }
+  .attach-preview {
+    display: flex; align-items: center; gap: 10px; margin: 0 12px 8px; padding: 6px 6px 6px 8px; border-radius: 16px;
+    background: var(--glass); border: 1px solid rgba(var(--acc-rgb),.35); font-size: 12.5px; color: var(--sub-text);
+  }
+  .attach-preview[hidden] { display: none; }
+  .attach-preview img { width: 44px; height: 44px; object-fit: cover; border-radius: 10px; }
+  .attach-preview span { flex: 1; }
+  .attach-preview .icon-btn { width: 32px; height: 32px; font-size: 14px; color: var(--sub-text); }
+  .bubble-img {
+    display: block; max-width: 220px; max-height: 280px; border-radius: 16px; cursor: zoom-in;
+    border: 1px solid var(--glass-border); box-shadow: 0 6px 20px rgba(0,0,0,.25);
+  }
+  .group.me .row:has(.bubble-img) { justify-content: flex-start; }
+  .lightbox {
+    position: absolute; inset: 0; z-index: 30; background: rgba(5,5,10,.88); display: none; place-items: center; padding: 20px; cursor: zoom-out;
+    backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+  }
+  .lightbox.show { display: grid; }
+  .lightbox img { max-width: 100%; max-height: 100%; border-radius: 14px; box-shadow: 0 20px 60px rgba(0,0,0,.6); }
+
+  /* 단톡방 프로필 (멤버 2×2) */
+  .avatar.group-av {
+    display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 2px; padding: 3px;
+    background: var(--glass); border: 1px solid var(--glass-border);
+  }
+  .avatar.group-av::after { display: none; }
+  .avatar.mini { width: 100%; height: 100%; border-radius: 32%; font-size: 10px; box-shadow: none; }
+  .avatar.group-av.n2 .avatar.mini:nth-child(2) { grid-column: 2; grid-row: 2; }
+  .avatar.group-av.n3 .avatar.mini:nth-child(3) { grid-column: 1 / span 2; width: 50%; justify-self: center; }
+  .avatar.group-av.n1 .avatar.mini { grid-column: 1 / span 2; grid-row: 1 / span 2; }
+  .friend .count { font-family: var(--font-tech); font-size: 11px; font-weight: 400; color: var(--muted); }
+
+  /* 단톡방 멤버 고르기 */
+  .member-list { display: flex; flex-direction: column; gap: 4px; max-height: 300px; overflow-y: auto; }
+  .field .member { display: flex; margin: 0; font-size: inherit; font-weight: 400; color: var(--text); }
+  .member { display: flex; align-items: center; gap: 12px; padding: 8px 10px; border-radius: 14px; cursor: pointer; border: 1px solid transparent; }
+  .member:hover { background: var(--glass); }
+  .member:has(input:checked) { background: rgba(var(--acc-rgb),.10); border-color: rgba(var(--acc-rgb),.30); }
+  .member input { accent-color: var(--lav-2); width: 17px; height: 17px; flex-shrink: 0; }
+  .m-info { display: flex; flex-direction: column; min-width: 0; }
+  .m-info b { font-size: 14px; font-weight: 700; }
+  .m-info small { font-size: 11.5px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  /* 포인트 색상 고르기 */
+  .swatches { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px 8px; padding: 4px 0 10px; }
+  .swatch { display: flex; flex-direction: column; align-items: center; gap: 7px; border: 0; background: transparent; cursor: pointer; }
+  .swatch .dot {
+    position: relative; width: 48px; height: 48px; border-radius: 50%;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.6), 0 6px 16px rgba(0,0,0,.25); transition: transform .2s;
+  }
+  .swatch .dot::after { content: ""; position: absolute; inset: 0; border-radius: 50%; background: linear-gradient(180deg, rgba(255,255,255,.45), rgba(255,255,255,0) 55%); }
+  .swatch:hover .dot { transform: scale(1.06); }
+  .swatch.on .dot { box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--lav-2), 0 6px 18px rgba(var(--acc2-rgb),.45); }
+  .swatch.on .dot::before { content: "✓"; position: absolute; inset: 0; display: grid; place-items: center; z-index: 1; color: #1B1530; font-weight: 900; font-size: 18px; }
+  .swatch .label { font-size: 11.5px; color: var(--sub-text); }
+  .swatch.on .label { color: var(--text); font-weight: 700; }
+  .palette-btn { color: var(--lav-2); }
+
+  /* =========================================================
+     8. 아래 탭(친구 / 채팅) · 채팅 걸러보기
+     ========================================================= */
+  .tabbar {
+    display: flex; gap: 6px; flex-shrink: 0; margin: 0 14px calc(10px + env(safe-area-inset-bottom)); padding: 6px;
+    border-radius: 24px; background: var(--glass); border: 1px solid var(--glass-border);
+    backdrop-filter: blur(20px) saturate(140%); -webkit-backdrop-filter: blur(20px) saturate(140%);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 10px 30px rgba(0,0,0,.35);
+  }
+  [data-theme="light"] .tabbar { background: rgba(255,255,255,.75); box-shadow: inset 0 1px 0 #fff, 0 10px 30px rgba(var(--acc2-rgb),.12); }
+  .tab {
+    flex: 1; display: flex; align-items: center; justify-content: center; gap: 7px; height: 44px; border: 0; border-radius: 18px;
+    background: transparent; color: var(--muted); font-family: var(--font-display); font-weight: 700; font-size: 14px; cursor: pointer;
+    transition: background .25s, color .25s, box-shadow .25s;
+  }
+  .tab.on { background: var(--grad); color: #160F2B; box-shadow: 0 4px 16px rgba(var(--acc2-rgb),.35), inset 0 1px 0 rgba(255,255,255,.6); }
+  .tab:not(.on):hover { color: var(--text); }
+
+  .filters { display: flex; gap: 7px; padding: 4px 22px 10px; }
+  .filter {
+    font-size: 12.5px; font-weight: 600; padding: 6px 14px; border-radius: 20px; cursor: pointer;
+    color: var(--sub-text); background: transparent; border: 1px solid var(--glass-border); transition: all .2s;
+  }
+  .filter.on { color: var(--lav-1); background: rgba(var(--acc-rgb),.12); border-color: rgba(var(--acc-rgb),.45); }
+
+  /* =========================================================
+     9. 애니 캐릭터 찾기 결과 카드
+     ========================================================= */
+  .found { border-radius: 18px; padding: 14px; margin-bottom: 12px; background: var(--glass); border: 1px solid rgba(var(--acc-rgb),.35); }
+  .found-head { display: flex; gap: 12px; align-items: center; margin-bottom: 10px; }
+  .found-head b { display: block; font-family: var(--font-display); font-weight: 800; font-size: 17px; }
+  .found-head small { color: var(--sub-text); font-size: 12.5px; }
+  .found-prompt { font-size: 12.5px; line-height: 1.6; color: var(--sub-text); white-space: pre-wrap; max-height: 160px; overflow-y: auto; }
+  .found-src { margin-top: 8px; font-size: 11.5px; color: var(--muted); }
+  .found-src a { color: var(--lav-2); }
+  #fActions .btn.ghost { margin-bottom: 8px; }
+  #findBtn:disabled { opacity: .6; cursor: progress; }
+
+  /* =========================================================
+     10. 채팅방 배경 — 캐릭터 색 + 이모지 무늬, 또는 내가 고른 사진
+     ========================================================= */
+  .room-bg {
+    position: absolute; inset: 0; z-index: -1; pointer-events: none;
+    background-color: var(--surface);
+    transition: background .4s;
+  }
+  .room-bg.themed {
+    background:
+      var(--room-pattern, none),
+      radial-gradient(60% 40% at 100% 0%, rgba(var(--room-rgb), .38), transparent 70%),
+      radial-gradient(55% 40% at 0% 100%, rgba(var(--room-rgb2, var(--room-rgb)), .30), transparent 70%),
+      radial-gradient(40% 30% at 20% 30%, rgba(var(--room-rgb), .12), transparent 70%),
+      var(--surface);
+  }
+  [data-theme="light"] .room-bg.themed {
+    background:
+      var(--room-pattern, none),
+      radial-gradient(60% 40% at 100% 0%, rgba(var(--room-rgb), .30), transparent 70%),
+      radial-gradient(55% 40% at 0% 100%, rgba(var(--room-rgb2, var(--room-rgb)), .26), transparent 70%),
+      var(--surface);
+  }
+  .room-bg.photo { background: var(--room-scrim), var(--room-photo) center / cover no-repeat, var(--surface); }
+  .room-bg.photo { --room-scrim: linear-gradient(rgba(11,11,16,.62), rgba(11,11,16,.78)); }
+  [data-theme="light"] .room-bg.photo { --room-scrim: linear-gradient(rgba(248,246,253,.60), rgba(248,246,253,.78)); }
+  .screen.chat:has(.room-bg.themed)::before, .screen.chat:has(.room-bg.photo)::before { display: none; }
+</style>
+</head>
+<body>
+<div class="app" id="app">
+
+  <!-- ============ 친구 목록 화면 ============ -->
+  <section class="screen" id="listScreen">
+    <header class="list-header">
+      <h1 id="listTitle">친구</h1>
+      <button class="icon-btn" aria-label="캐릭터 추가" id="addFriendBtn">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="10" cy="8" r="4"/><path d="M2 21c0-4 4-6 8-6s8 2 8 6"/><path d="M19 8v6M16 11h6"/></svg>
+      </button>
+      <button class="icon-btn theme-btn" aria-label="라이트 모드로 바꾸기" id="themeBtn">
+        <!-- 초승달 (다크 모드일 때) -->
+        <svg class="moon" width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M20.5 14.6A8.5 8.5 0 0 1 9.4 3.5a.6.6 0 0 0-.8-.7A9.5 9.5 0 1 0 21.2 15.4a.6.6 0 0 0-.7-.8z"/></svg>
+        <!-- 해 (라이트 모드일 때) -->
+        <svg class="sun" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.2" fill="currentColor"/><path d="M12 2v2.2M12 19.8V22M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2 12h2.2M19.8 12H22M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"/></svg>
+      </button>
+      <button class="icon-btn palette-btn" aria-label="포인트 색상 바꾸기" id="paletteBtn">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a9 9 0 1 0 0 18c1.1 0 1.8-.8 1.8-1.8 0-.5-.2-.9-.5-1.2-.3-.3-.5-.7-.5-1.2 0-1 .8-1.8 1.8-1.8h2.1A4.3 4.3 0 0 0 21 10.7C21 6.4 17 3 12 3z"/><circle cx="7.5" cy="11" r="1.3" fill="currentColor" stroke="none"/><circle cx="10.5" cy="7.2" r="1.3" fill="currentColor" stroke="none"/><circle cx="15" cy="7.4" r="1.3" fill="currentColor" stroke="none"/></svg>
+      </button>
+      <button class="icon-btn" aria-label="API 키 설정" id="openKeyFromList">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+      </button>
+    </header>
+    <div class="list-body" id="listBody"></div>
+    <!-- 아래 탭: 친구 / 채팅 -->
+    <nav class="tabbar" aria-label="화면 바꾸기">
+      <button class="tab on" id="tabFriends" data-tab="friends">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>
+        <span>친구</span>
+      </button>
+      <button class="tab" id="tabChats" data-tab="chats">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3.5c5 0 9 3.2 9 7.2s-4 7.2-9 7.2c-.9 0-1.8-.1-2.6-.3L5 20l1-3.6C4.2 15.1 3 13 3 10.7 3 6.7 7 3.5 12 3.5z"/></svg>
+        <span>채팅</span>
+      </button>
+    </nav>
+  </section>
+
+  <!-- ============ 채팅방 화면 ============ -->
+  <section class="screen chat" id="chatScreen" aria-hidden="true">
+    <div class="room-bg" id="roomBg" aria-hidden="true"></div>
+    <header class="chat-header">
+      <button class="icon-btn" aria-label="친구 목록으로" id="backBtn">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <div class="title">
+        <strong id="chatTitle"></strong>
+        <span id="statusText"><i class="status-dot off" id="statusDot"></i><b style="font-weight:400" id="statusLabel"></b></span>
+      </div>
+      <button class="icon-btn" aria-label="채팅방 메뉴" id="openRoomMenu">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
+    </header>
+    <main class="messages" id="messages" aria-live="polite"></main>
+    <div class="chips" id="chips"></div>
+    <div class="attach-preview" id="attachPreview" hidden>
+      <img id="attachImg" alt="첨부할 사진 미리보기" />
+      <span>사진을 보낼게요 · 메시지를 같이 적어도 돼요</span>
+      <button class="icon-btn" id="attachRemove" aria-label="첨부 취소" type="button">✕</button>
+    </div>
+    <footer class="composer">
+      <button class="attach-btn" id="attachBtn" aria-label="사진 첨부" type="button">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+      </button>
+      <input type="file" id="fileInput" accept="image/*" hidden />
+      <textarea id="input" rows="1" placeholder="메시지 입력" aria-label="메시지 입력"></textarea>
+      <button class="send" id="sendBtn" disabled>전송</button>
+    </footer>
+  </section>
+
+  <div class="dim" id="dim"></div>
+
+  <!-- ============ 시트: API 키 설정 ============ -->
+  <section class="sheet" id="keySheet" role="dialog" aria-modal="true" aria-labelledby="keyTitle">
+    <div class="grabber"></div>
+    <h2 id="keyTitle">Groq API 키 설정</h2>
+    <p class="desc">캐릭터들이 답하려면 Groq API 키가 필요해요. 키는 이 브라우저 안에만 저장되고, Groq 서버로 보낼 때 말고는 어디에도 전송되지 않아요.</p>
+    <div class="field">
+      <label for="keyInput">API 키</label>
+      <div class="input-wrap">
+        <input id="keyInput" type="password" placeholder="gsk_로 시작하는 키" autocomplete="off" spellcheck="false" autocapitalize="off" />
+        <button class="icon-btn" id="toggleKey" aria-label="키 보기/숨기기" type="button">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg>
+        </button>
+      </div>
+      <p class="help">키 발급: <a href="https://console.groq.com/keys" target="_blank" rel="noopener noreferrer">console.groq.com/keys</a> → Create API Key</p>
+    </div>
+    <label class="check">
+      <input type="checkbox" id="rememberKey" />
+      <span>이 기기에 키 기억하기<br><span class="hint">체크 안 하면 탭을 닫을 때 키가 자동으로 지워져요 (더 안전)</span></span>
+    </label>
+    <p class="msg" id="keyMsg"></p>
+    <button class="btn primary" id="saveKey">연결 확인 후 저장</button>
+    <div class="field" style="margin-top:16px">
+      <label for="modelSelect">AI 모델</label>
+      <select id="modelSelect"><option value="">키를 저장하면 목록을 불러와요</option></select>
+    </div>
+    <div class="divider"></div>
+    <button class="btn danger" id="deleteKey">저장된 API 키 삭제</button>
+    <div class="security">
+      <b>🔒 키를 안전하게 쓰는 법</b><br>
+      · 키를 코드나 파일 안에 직접 적지 마세요.<br>
+      · 이 파일을 웹에 그대로 배포해도 내 키는 안 들어가지만, 방문자가 각자 키를 넣어야 해요.<br>
+      · 키가 노출됐다면 Groq 콘솔에서 바로 삭제하고 새로 발급하세요.<br>
+      · 공용 PC에서는 '기억하기'를 끄고 쓰세요.
+    </div>
+  </section>
+
+  <!-- ============ 시트: 캐릭터 추가/수정 ============ -->
+  <section class="sheet" id="personaSheet" role="dialog" aria-modal="true" aria-labelledby="personaTitle">
+    <div class="grabber"></div>
+    <div class="sheet-head">
+      <h2 id="personaTitle">새 캐릭터 추가</h2>
+      <button class="btn link" id="fillExample" type="button">예시로 채우기</button>
+    </div>
+    <p class="desc">대화하고 싶은 캐릭터(페르소나)를 직접 만들어요. '캐릭터 설정'에 적은 내용대로 AI가 연기해요.</p>
+
+    <div class="field">
+      <span class="label">프로필</span>
+      <div class="profile-pick">
+        <div class="avatar lg" id="pPreview"></div>
+        <div style="flex:1">
+          <input class="text-input emoji-input" id="pEmoji" maxlength="2" placeholder="🙂" aria-label="프로필 이모지 또는 글자" />
+          <div class="colors" id="pColors" style="margin-top:8px"></div>
+        </div>
+      </div>
+    </div>
+    <div class="field">
+      <label for="pName">이름</label>
+      <input class="text-input" id="pName" maxlength="20" placeholder="예: 이서연 선배" />
+    </div>
+    <div class="field">
+      <label for="pStatus">한 줄 소개 <span class="opt">(친구 목록에 보여요)</span></label>
+      <input class="text-input" id="pStatus" maxlength="40" placeholder="예: 5년 차 UX 리서처" />
+    </div>
+    <div class="field">
+      <label for="pPrompt">캐릭터 설정</label>
+      <textarea id="pPrompt" rows="5" placeholder="누구인지, 나이·경력, 성격, 말투, 무엇을 도와주는지 적어요.&#10;예: 너는 5년 차 UX 리서처 이서연이야. 차분하고 꼼꼼해. 해요체를 써. 사용자 인터뷰 질문 만들기를 도와줘."></textarea>
+    </div>
+    <div class="field">
+      <label for="pGreeting">첫 인사말 <span class="opt">(선택)</span></label>
+      <input class="text-input" id="pGreeting" maxlength="120" placeholder="예: 안녕하세요! 리서치 고민 있으면 편하게 물어봐요 :)" />
+    </div>
+    <div class="field">
+      <label for="pChips">빠른 질문 <span class="opt">(선택, 쉼표로 구분)</span></label>
+      <input class="text-input" id="pChips" placeholder="예: 인터뷰 질문 같이 만들어요, 설문은 몇 명이 적당해요?" />
+    </div>
+    <label class="check">
+      <input type="checkbox" id="pUseInfo" checked />
+      <span>부트캠프 과정 정보 알려주기<br><span class="hint">켜면 6기 일정·커리큘럼을 알고 대답해요</span></span>
+    </label>
+    <label class="check">
+      <input type="checkbox" id="pUseFood" />
+      <span>교육장 근처 맛집·술집 정보 알려주기 🍚🍻<br><span class="hint">켜면 양평역 근처 식당과 술집을 카카오맵 링크와 함께 추천해요</span></span>
+    </label>
+    <p class="msg" id="pMsg"></p>
+    <button class="btn primary" id="savePersona">추가하기</button>
+    <button class="btn danger" id="deletePersona" style="display:none">이 캐릭터 삭제</button>
+  </section>
+
+  <!-- ============ 시트: 채팅방 메뉴 ============ -->
+  <section class="sheet" id="roomSheet" role="dialog" aria-modal="true" aria-label="채팅방 메뉴">
+    <div class="grabber"></div>
+    <button class="menu-item" id="menuEdit">캐릭터 설정 보기·수정</button>
+    <button class="menu-item" id="menuBg">🖼 배경 사진 고르기</button>
+    <button class="menu-item" id="menuBgReset" style="display:none">배경 원래대로 (캐릭터 색)</button>
+    <input type="file" id="bgInput" accept="image/*" hidden />
+    <button class="menu-item" id="menuKey">API 키·AI 모델 설정</button>
+    <button class="menu-item red" id="menuClear">이 채팅방 대화 지우기</button>
+    <button class="menu-item red" id="menuLeave" style="display:none">단톡방 나가기</button>
+  </section>
+
+  <!-- ============ 시트: 단톡방 만들기/수정 ============ -->
+  <section class="sheet" id="groupSheet" role="dialog" aria-modal="true" aria-labelledby="groupTitle">
+    <div class="grabber"></div>
+    <h2 id="groupTitle">단톡방 만들기</h2>
+    <p class="desc">함께 이야기할 친구를 2명 이상 골라요. 말할 때 이름을 부르면(예: "민준아", "강사님") 그 친구가 먼저 대답하고, 안 부르면 여러 명이 돌아가며 대답해요.</p>
+    <div class="field">
+      <label for="gName">단톡방 이름 <span class="opt">(선택)</span></label>
+      <input class="text-input" id="gName" maxlength="24" placeholder="예: 6기 팀플방" />
+    </div>
+    <div class="field">
+      <span class="label">멤버</span>
+      <div class="member-list" id="gMembers"></div>
+    </div>
+    <p class="msg" id="gMsg"></p>
+    <button class="btn primary" id="saveGroup">단톡방 만들기</button>
+    <button class="btn danger" id="deleteGroup" style="display:none">단톡방 나가기</button>
+  </section>
+
+
+  <!-- ============ 시트: 애니 캐릭터 찾아서 추가 ============ -->
+  <section class="sheet" id="findSheet" role="dialog" aria-modal="true" aria-labelledby="findTitle">
+    <div class="grabber"></div>
+    <h2 id="findTitle">애니 캐릭터 찾아서 추가</h2>
+    <p class="desc">이름을 적으면 위키백과(그리고 Groq 웹 검색이 되면 웹)에서 자료를 찾아서, 성격·말투·첫인사까지 정리해 캐릭터로 만들어요.</p>
+    <div class="field">
+      <label for="fName">캐릭터 이름</label>
+      <input class="text-input" id="fName" maxlength="30" placeholder="예: 진구, 탄지로, 피카츄" />
+    </div>
+    <div class="field">
+      <label for="fWork">작품 이름 <span class="opt">(선택 · 적으면 더 정확해요)</span></label>
+      <input class="text-input" id="fWork" maxlength="40" placeholder="예: 도라에몽, 귀멸의 칼날, 포켓몬스터" />
+    </div>
+    <p class="msg" id="fMsg"></p>
+    <div class="found" id="fResult" hidden></div>
+    <div id="fActions" hidden>
+      <button class="btn primary" id="fAdd">이대로 추가하고 대화하기</button>
+      <button class="btn ghost" id="fEdit">내용 고쳐서 추가하기</button>
+    </div>
+    <button class="btn primary" id="findBtn">찾아보기</button>
+  </section>
+
+  <!-- ============ 시트: 포인트 색상 ============ -->
+  <section class="sheet" id="themeSheet" role="dialog" aria-modal="true" aria-labelledby="themeTitle">
+    <div class="grabber"></div>
+    <h2 id="themeTitle">포인트 색상</h2>
+    <p class="desc">말풍선·버튼·제목 빛깔이 바뀌어요. 다크·라이트 모드 둘 다 어울리게 맞춰져 있어요.</p>
+    <div class="swatches" id="swatches"></div>
+  </section>
+
+  <!-- 사진 크게 보기 -->
+  <div class="lightbox" id="lightbox" aria-label="사진 크게 보기"><img id="lightboxImg" alt="크게 본 사진" /></div>
+</div>
+
+<script>
+/* =========================================================
+   A. 부트캠프 과정 정보 (한경닷컴 IT교육센터 공식 모집 페이지 기준, 2026-10 확인)
+   ========================================================= */
+const ACADEMY_INFO = `
+[과정 정보 — 한경닷컴 IT교육센터 공식 모집 페이지 기준]
+- 과정명: 프로젝트 기반 UX/UI 디자인 실전캠프 (부제: QUANT UX 차세대 디자인 PM)
+- 운영: 한경닷컴 IT교육센터 (한국경제신문 계열)
+- 지원 방식: 국비지원 K-Digital Training, 자부담금 40만원
+- 지원 자격: 국민내일배움카드 발급 가능자, 전공 무관, 디자인 비전공자 환영
+- 선발 절차: 온라인 지원서 → 서류 심사 → 최종 합격 개별 안내 → 고용24에서 수강신청·승인
+
+[6기 — 지금 수강생이 듣는 기수]
+- 개강: 2026년 10월 12일(월), 약 4개월(17주)
+- 수업: 평일 09:00~18:00. 프로젝트 수업 기준 월~수 오프라인, 목~금 온라인
+- 구성: 이론 수업 1~9주(애자일 스쿼드 구성) → 팀 프로토타이핑 9~11주(80시간) → Group act program 11~17주(208시간)
+- 수료일, 휴강일, 훈련장려금 금액: 공식 페이지에 없음 → 운영팀 확인 필요
+
+[7기 — 다음 기수]
+- 2026년 12월 17일(목) ~ 2027년 4월 16일(금), 총 80일·640시간, 수업 방식은 6기와 같음
+
+[커리큘럼 — 4개 페이즈]
+Phase 01 비즈니스 & 애자일 기획
+- W01: PM·PO·UX/UI 디자이너·프론트엔드 역할 비교, 희망 기업 JD 분석, AI 바이브 코딩용 PRD 작성, HTML/CSS/JS 기초, 디자인 기초(컬러·타이포·그리드)
+- W02: 애자일 방법론(워터폴·린·애자일 비교), 스프린트 보드 실습, Jira·Git 협업
+- W03: 디자인 씽킹 워크숍, UI·UX·HCI·DesignOps 역할, 서비스 구조 분석, UX 가설 수립
+Phase 02 UX 리서치 & 디자인 시스템
+- W04: 사용자 리서치(정량·정성), 행동 데이터 해석, 페르소나, 사용자 여정 맵
+- W05: 아토믹 디자인, 디자인 시스템 구축, Figma 라이브러리·디자인 토큰
+- W06: 디자인 핸드오프, 웹 접근성(WCAG), UX Quality Test, Spec Sheet·Redline·개발자 모드, 마이크로 인터랙션
+Phase 03 데이터 분석 & 프로토타이핑
+- W07: TAM·SAM·SOM 시장 분석, 경쟁 서비스 분석, SQL 기본 문법
+- W08: Google Analytics 행동 추적, AARRR 퍼널·KPI, A/B 테스트
+- W09: POC와 MVP 차이, Figma 고급 프로토타이핑, 스토리보드, Claude·Google Stitch·Figma Make 활용
+- W10: HTML/CSS, React, 반응형 레이아웃, shadcn/ui, Figma Tokens·Design.MD
+- W11: PEST·SWOT·5-Forces, RICE·MoSCoW·KANO 우선순위, Jira 스프린트·일정 관리
+Phase 04 실전 특화 프로젝트
+- W12~: 경제 저널리즘·핀테크(금융/뉴스) 도메인 역기획, 데이터 기반 대시보드, 신규 서비스 기획·프로토타입·MVP 제작·배포
+- 이후 주차의 세부 내용은 공식 페이지에 없음
+
+[프로젝트]
+- 한국경제 실제 데이터와 Google Analytics 4로 데이터 기반(QUANT UX) 설계
+- React·SQL 기반으로 실제 동작하는 MVP를 애자일 팀 프로젝트로 제작·배포
+- 수료까지 포트폴리오 2개 이상 완성 목표 (5기 최우수팀: COM4NENT)
+
+[지원·혜택]
+- 교육 기간 동안 Figma Pro, Claude Pro 유료 계정과 노트북 PC 제공
+- 한국경제 현업 멘토 4명 이상, 1:1 멘토링
+- 강사진: Microsoft(핀란드), Nokia, Philips Design, Motorola Korea, LG전자 등 글로벌 기업 출신 실무 강사
+- 시설: 전용 교육장 7개, 프로젝트룸 6개, 상담실, 카페테리아, 소셜 라운지
+- 취업 지원: 기업 공고 맞춤 1:1 이력서·포트폴리오 첨삭, UX/UI 전 직무(디자이너·퍼블리셔·서비스 기획자·PM) 1:1 상담, 청년 일경험 포털 등 취업 연계
+- 기관 발표 수치: 누적 수료생 900명 이상, 평균 취업률 75%
+
+[문의처]
+- 주소: 서울 영등포구 양산로 53 월드메르디앙 비즈센터 1101호
+- 전화 02-6340-2460 / 이메일 itcampus@hankyung.com / 카카오톡 상담 pf.kakao.com/_qsApxd
+`;
+
+
+/* =========================================================
+   A-2. 교육장 근처 맛집 정보 (카카오맵 검색 결과 기준, 2026-10-27 확인)
+   형식: 이름 | 종류 | 카카오맵 별점(리뷰 수) | 주소 | 영업시간 | 카카오맵 장소 ID
+   영업시간·별점은 바뀔 수 있어요. 직접 가 본 곳은 메모를 덧붙여 보세요.
+   ========================================================= */
+const FOOD_INFO = `
+[교육장 근처 맛집 — 카카오맵 기준, 2026년 10월 27일 확인]
+교육장: 서울 영등포구 양산로 53 월드메르디앙비즈센터 (5호선 양평역 바로 앞, 영등포구청역과는 다른 동네)
+점심시간 기준으로 골랐어. 별점 옆 괄호는 카카오맵 리뷰 수, 별점 없음 = 아직 평가가 적은 곳.
+
+[1] 같은 건물 1층 (비 오는 날, 시간 없을 때)
+- 본가네국밥 영등포양평역점 | 국밥 | 별점 없음(리뷰 27) | 양산로 53 1층 105호 | 매일 10:00~22:00 | 1481782609
+- 동그라미 | 돈까스·우동 | 별점 없음 | 양산로 53 1층 102호 | 월~금 11:15~20:30 | 15978407
+- 백년순대이야기 | 순대국 | 3.1(22) | 양산로 53 1층 | 월~금 11:00~21:30, 쉬는 시간 14:30~17:00 | 1053147659
+- 횡성생고기 양평점 | 고기·점심 식사 | 3.7(14) | 양산로 53 1층 101호 | 매일 10:30~22:00 | 27322255
+- 킹콩부대찌개 서울양평역점 | 부대찌개 | 2.9(81) | 양산로 53 1층 107호 | 매일 11:00~22:00, 쉬는 시간 15:00~17:00 | 검색
+- 차이나쿡 양평점 | 중국요리 | 2.8(20) | 양산로 53 1층 104호 | 월~금 11:00~21:30 | 검색
+- 메가MGC커피 양평역점 | 카페 | 2.3 | 양산로 53 1층 108호 | 월~금 07:30~22:00 | 검색
+
+[2] 양평역 주변 양산로·양산로7길·9길 (가까움)
+- 진콩나물국밥 | 콩나물국밥 | 4.0(35) | 양산로 56 창건애드웰아파트 상가 1층 | 월~금 06:00~22:00 | 16852329
+- 콩두 양평역점 | 두부 요리 | 4.0(23) | 양산로 57-5 이노플렉스 1층 | 매일 10:00~24:00 | 26923693
+- 혜화동돈까스 양평역점 | 돈까스 | 3.7(23) | 양산로 57-5 1층 | 매일 11:00~21:00 | 48277100
+- 블루어스 | 한식 | 4.4(3) | 양산로 57-5 | 월~금 10:30~20:15 | 812673240
+- 양남식당 | 일식 | 4.2(11) | 양산로 52 1층 | 매일 11:30~01:00 | 1894133290
+- 크크분식 | 분식 | 별점 없음 | 양산로 50-1 양평빌딩 1층 | 매일 07:50~20:00 | 1485414054
+- 얌샘김밥 양평역점 | 김밥·분식 | 1.7(70) | 양산로 50-1 양평빌딩 1층 | 매일 07:00~20:30 | 1749576309
+- 향미옥 | 국수 | 4.3(4) | 양산로 71 1층 | 월~토 11:00~21:00 | 1804075921
+- 좋은날에 | 분식 | 4.5(15) | 양산로 73 1층 | 월~수 08:00~19:00 | 439408536
+- 나그네 | 국밥 | 4.4(44) | 양산로 88 1층 | 월~금 11:00~21:30, 쉬는 시간 14:30~17:30 | 112468265
+- 언고기 | 한식 | 4.3(24) | 양산로9길 12 1층 | 영업시간 정보 없음 | 1404794826
+- 포케올데이 양평역점 | 샐러드·포케 | 3.7(15) | 양산로9길 11 더라임 1층 | 월~금 10:30~20:30, 쉬는 시간 15:00~16:00 | 1420787639
+- 삼순이바지락칼국수 | 칼국수 | 3.8(7) | 양산로7길 3 1층 | 월~토 11:30~21:00 | 16303288
+- 샐러드 서울영등포점 | 샐러드 | 4.4(27) | 양산로 101 | 월~금 09:00~21:40 | 1282816627
+- 시즌커피앤베이크 | 카페·베이커리 | 3.9(245) | 양산로9길 12-1 | 매일 08:00~21:00 | 459660544
+
+[3] 선유서로·영등포로5길·선유로 쪽 (조금 걷기)
+- 명가들깨칼국수 양평점 | 들깨칼국수 | 4.4(57) | 선유서로 115 1층 | 월~토 10:30~21:00, 쉬는 시간 15:00~16:00 | 27322857
+- 명품소부장 | 고기·점심 식사 | 4.6(332) | 선유서로 103-3 | 월~금 11:30~22:00, 쉬는 시간 15:00~17:00 | 1833816481
+- 희보돈까스 | 돈까스 | 4.3(28) | 선유서로 117 1층 | 월~금 10:00~20:30 | 772871799
+- 양평동 세모떡볶이 | 떡볶이 | 4.5(4) | 선유서로 121 | 월~금 11:30~21:00 | 2070355737
+- 장군식당 | 순대국 | 4.2(22) | 선유서로25길 2 1층 | 매일 10:00~15:00 (점심 장사만) | 1709744308
+- 긴자료코 양평점 | 돈까스·우동 | 4.7(35) | 선유서로24길 6 1층 | 매일 11:00~21:00, 쉬는 시간 15:30~16:30 | 1797538367
+- 양평동서천식당 양평동본점 | 한식 | 4.0(18) | 영등포로5길 19 1층 | 월~금 06:00~21:00 | 16448033
+- 부영이네손맛 | 분식 | 4.7(14) | 영등포로5길 31 1층 | 매일 06:00~22:00 | 1714530947
+- 병천가마솥순대국 영등포양평점 | 순대국 | 4.3(8) | 영등포로5길 38 1층 | 월~금 10:00~21:00 | 334996270
+- 고성소머리국밥 | 소머리국밥 | 4.3(92) | 선유로 119 1층 | 매일 06:00~21:00 | 272362163
+- 해남진성옥 양평동1호점 | 곰탕·고기 | 4.6(20) | 선유로33길 30 2층 | 매일 11:00~22:00 | 27163891
+- 황금순추어탕 | 추어탕 | 4.8(85) | 선유동2로 9 K타워 1층 | 월~토 10:30~21:00 | 767834308
+
+[맛집 추천 규칙]
+- 위 목록에 있는 식당만 실제 이름으로 추천해. 목록에 없는 가게 이름은 지어내지 마.
+- 추천할 땐 이름, 메뉴 종류, 위치(같은 건물 / 양평역 주변 / 선유서로 쪽), 쉬는 시간을 짧게 말해 줘.
+- 추천한 식당마다 카카오맵 링크를 따로 한 줄에 붙여: 장소 ID가 있으면 https://place.map.kakao.com/장소ID , '검색'이라고 적힌 곳은 https://map.kakao.com/link/search/가게이름
+- 목록에 없는 메뉴를 원하면 https://map.kakao.com/link/search/양평역%20메뉴이름 링크로 직접 찾아보라고 해.
+- 영업시간과 별점은 바뀔 수 있으니 가기 전에 카카오맵에서 확인하라고 가끔 말해 줘.
+- 점심시간이 보통 12:00~13:00라서 사람이 몰려. 시간이 빠듯하면 같은 건물이나 양평역 주변을 먼저 추천해.
+`;
+
+/* =========================================================
+   A-3. 교육장 근처 술집 정보 (카카오맵 검색 결과 기준, 2026-10-27 확인)
+   형식: 이름 | 종류 | 카카오맵 별점(리뷰 수) | 주소 | 영업시간 | 카카오맵 장소 ID
+   ========================================================= */
+const DRINK_INFO = `
+[교육장 근처 술집 — 카카오맵 기준, 2026년 10월 27일 확인]
+수업 끝나고(18시 이후) 동기들이랑 가볍게 한잔, 팀플 뒤풀이, 회식용으로 골랐어.
+
+[1] 양평역 근처 (교육장에서 걸어서 가까움)
+- 양남바당 | 실내포장마차 | 4.3(102) | 선유서로 87 2층 | 월~토 18:30~02:00 | 473358330
+- 덕일마차 | 실내포장마차 | 3.9(8) | 선유서로25길 9 1층 | 매일 17:00~24:00 | 21420849
+- 역전포차 | 실내포장마차 | 3.4(1) | 선유서로 103 1층 | 매일 18:00~03:00 | 680823769
+- 계절포차 | 실내포장마차 | 4.0(5) | 선유서로 67 상가 1층 | 월~토 16:00~23:00 | 21928440
+- 한강치킨&포차 | 치킨·호프 | 5.0(6) | 영등포로5길 18 1층 | 매일 16:00~02:00 | 758509130
+- 양평동맥주 양평점 | 호프 | 5.0(2) | 영등포로5길 22-1 1층 | 영업시간 정보 없음 | 368731909
+- 금별맥주 양평역점 | 호프 | 5.0(4) | 영등포로11길 9 자이타워 111호 | 영업시간 정보 없음 | 388894297
+- 꼬치피고 | 꼬치·호프 | 4.9(11) | 영등포로12길 11 한신아파트 상가 1층 | 월~토 16:00~02:00 | 1636298951
+- 삼국주 | 호프·요리주점 | 3.5(4) | 양산로7길 3 1층 | 영업시간 정보 없음 | 15979933
+- 밥술 | 밥집 겸 술집 | 5.0(10) | 양산로 96 1층 | 월~목 11:00~01:00, 쉬는 시간 15:00~17:00 | 1980923557
+- 헬리콘바 | 칵테일바 | 4.2(1) | 선유서로25길 6-1 1층 | 월~토 18:00~01:00 | 741816168
+- 블루스보틀 | 와인바 | 4.8(112) | 영등포로 20-1 1층 | 화~토 17:00~23:00 (라스트오더 21:40) | 1632482845
+- 업스테어앤드 | 와인바 | 5.0(25) | 양평로17길 6 2층 | 월~금 11:00~22:00 | 215146512
+
+[2] 고기 + 술 (팀플 뒤풀이·회식용)
+- 양평소금집 | 삼겹살 | 4.8(996) | 영등포로5길 19 동아프라임밸리 1층 | 월~금 11:00~23:00, 쉬는 시간 15:00~17:00 | 1780843781
+- 하남돼지집 양평점 | 삼겹살 | 4.2(212) | 선유로 130 에이스하이테크시티3 1층 | 쉬는 시간 14:00~16:00 | 1708990781
+- 대박집 | 삼겹살 | 4.3(29) | 선유로23길 3-1 1층 | 월~토 16:00~04:00 | 954825924
+- 명품소부장 | 소고기·고기 | 4.6(332) | 선유서로 103-3 | 월~금 11:30~22:00, 쉬는 시간 15:00~17:00 | 1833816481
+
+[3] 영등포구청역 쪽 (술집이 많이 모인 곳, 교육장에서 걸으면 좀 멀어서 2차 장소로)
+- 애월의밤 | 이자카야 | 4.3(357) | 국회대로34길 10 지하1층 | 화~목 17:00~01:00 | 1709371286
+- 이자카야 호세 | 이자카야 | 4.9(32) | 국회대로34길 5-1 1층 | 월~토 17:00~02:00 | 1583971411
+- 모아래 로바다야끼 영등포점 | 이자카야(로바다야키) | 4.8(32) | 국회대로36길 14-2 1층 | 월~토 17:00~02:00 | 1212733693
+- 다다하다 영등포구청점 | 이자카야 | 4.0(123) | 당산로32길 2 1층 | 월·화·수·목·일 17:00~02:00 | 1630619764
+- 몰리노 | 와인바 | 5.0(56) | 국회대로34길 14 2층 | 매일 18:00~03:00 | 1569226080
+- 대박곱창구이 | 곱창 | 4.4(918) | 당산로30길 6-1 1층 | 월~금 13:00~24:00 | 13288599
+- 우리삼겹 | 삼겹살 | 4.3(85) | 국회대로34길 5 1층 | 매일 13:00~01:00 | 14685387
+- 두툼한고깃집 | 고기 | 4.8(77) | 당산로32길 4 1층 | 월~금 16:00~02:00 | 27307089
+- 도리연 닭도리탕 영등포구청점 | 닭볶음탕 | 4.5(551) | 국회대로34길 19 1층 | 월~금 11:30~02:00 | 872088740
+
+[술집 추천 규칙]
+- 저녁·뒤풀이·회식·술 이야기가 나오면 이 목록에서 추천해. 점심 질문엔 맛집 목록을 써.
+- 위 목록에 있는 가게만 실제 이름으로 추천하고, 추천한 곳마다 https://place.map.kakao.com/장소ID 링크를 한 줄에 붙여.
+- 인원·분위기(조용히 / 시끌벅적 / 가볍게 한잔 / 배부르게)·예산을 물어보고 맞춰 추천해.
+- 별점 옆 리뷰 수가 적으면(10개 미만) "아직 리뷰가 적은 곳"이라고 솔직히 말해.
+- 술을 권하거나 많이 마시라고 부추기지 마. 다음 날 9시 수업이 있으면 적당히 마시자고 한 마디 해 줘.
+- 막차 시간은 지어내지 말고, 카카오맵 길찾기로 확인하라고 해.
+`;
+
+// 오늘 날짜와 6기 진행 주차를 자동으로 계산해서 알려줘요
+function dateContext() {
+  const now = new Date();
+  const start = new Date(2026, 9, 12); // 6기 개강일 (월은 0부터 시작해서 9 = 10월)
+  const diff = Math.floor((now - start) / 86400000);
+  const week = diff >= 0 ? Math.floor(diff / 7) + 1 : 0;
+  const days = ["일", "월", "화", "수", "목", "금", "토"];
+  const today = `${now.getFullYear()}년 ${now.getMonth() + 1}월 ${now.getDate()}일 ${days[now.getDay()]}요일`;
+  const weekText = week > 0 && week <= 17
+    ? `6기는 개강 후 대략 ${week}주차예요(휴강일에 따라 실제 진도는 다를 수 있음).`
+    : (week > 17 ? "6기 정규 일정(17주)은 끝났을 수 있어요." : "6기는 아직 개강 전이에요.");
+  return `[오늘] ${today}. ${weekText}`;
+}
+
+/* =========================================================
+   B. 기본 캐릭터(페르소나) — 박한경 매니저 외에는 실습용 가상 인물이에요
+   새 캐릭터는 화면의 '친구 추가' 버튼으로도 만들 수 있어요
+   ========================================================= */
+const DEFAULT_PERSONAS = [
+  {
+    id: "hankyung", name: "박한경 매니저", status: "6기 담당 매니저 · 일정·출결·상담",
+    emoji: "", color: "#8B6CFF", useInfo: true, builtIn: true,
+    greeting: "안녕하세요! UX/UI 실전캠프 6기 담당 매니저 박한경이에요 😊\n\n수업 일정, 커리큘럼, 출결, 포트폴리오까지 궁금한 건 편하게 물어봐 주세요.",
+    chips: ["이번 주는 뭘 배워요?", "온라인·오프라인 수업 요일이 어떻게 돼요?", "비전공자도 따라갈 수 있을까요?", "UX 디자이너랑 PM은 뭐가 달라요?", "수업에서 주는 혜택이 뭐예요?"],
+    prompt: `너는 "박한경"이야. 30대 중반이고, 한경닷컴 IT교육센터 '프로젝트 기반 UX/UI 디자인 실전캠프' 6기의 담당 매니저야.
+친근하고 따뜻한 해요체를 쓰고, 수강생을 "수강생님"이라고 불러.
+과정 일정·커리큘럼·혜택 안내, 출결과 생활 관련 상담, 학습 고민 격려, 포트폴리오·취업 준비 방향 안내를 맡고 있어.
+수업이 힘들다는 수강생에겐 먼저 공감하고, 작게 시작할 수 있는 방법을 알려줘.`,
+  },
+  {
+    id: "instructor", name: "윤서진 강사", status: "UX/UI·Figma 실습 강사 (가상 인물)",
+    emoji: "", color: "#5E6AD2", useInfo: true, builtIn: true,
+    greeting: "반가워요, UX/UI 실습 담당 윤서진이에요.\n\n수업에서 이해 안 됐던 개념이나 Figma 작업에서 막히는 부분 있으면 물어보세요. 예시로 쉽게 풀어드릴게요.",
+    chips: ["📎 피그마 캡처 보내고 피드백 받기", "컴포넌트랑 배리언트가 뭐예요?", "오토 레이아웃 쉽게 설명해 주세요", "디자인 토큰이 뭐예요?", "페르소나는 어떻게 만들어요?", "AARRR이 뭐예요?"],
+    prompt: `너는 "윤서진"이야. 40대 초반의 UX/UI 실무 강사이고, 이 부트캠프에서 Figma와 UX 실습을 돕는 역할이야. (실습용 가상 인물)
+차분하고 명확한 해요체를 써. 개념을 설명할 때는 일상생활 비유 하나 + 실제 화면 예시 하나를 꼭 들어줘.
+Figma 질문에는 "어디를 눌러서 무엇을 하는지" 순서대로 짧게 알려줘.
+수강생 수준은 완전 비전공 입문자라고 생각해. 답을 바로 다 주기보다 스스로 해볼 작은 과제를 하나 제안해.
+Figma 캡처를 받으면 실제 강사처럼 꼼꼼히 봐 줘. 고칠 점은 "제목과 본문 사이 간격을 8px → 16px로"처럼 숫자로 구체적으로 말해 줘.`,
+  },
+  {
+    id: "consultant", name: "정다은 컨설턴트", status: "포트폴리오·이력서·면접 코칭 (가상 인물)",
+    emoji: "", color: "#B07CFF", useInfo: true, builtIn: true,
+    greeting: "안녕하세요, 커리어 코칭 담당 정다은입니다 🙂\n\n포트폴리오 구성, 이력서, 면접 준비 무엇이든 같이 봐요. 목표 직무(UX 디자이너, 서비스 기획자, PM)부터 알려주시면 더 정확하게 도와드릴 수 있어요.",
+    chips: ["서비스 기획자 포트폴리오는 뭐가 달라요?", "케이스 스터디 구성 알려주세요", "비전공자 자기소개서 어떻게 써요?", "PM 면접 단골 질문이 뭐예요?"],
+    prompt: `너는 "정다은"이야. 30대 후반의 IT 직무 커리어 컨설턴트이고, 부트캠프 수강생의 포트폴리오·이력서·면접 준비를 코칭해. (실습용 가상 인물)
+전문적이지만 다정한 해요체를 써. 조언은 구체적으로: "무엇을 / 왜 / 어떻게" 순서로 짧게.
+포트폴리오는 결과 화면보다 문제 정의 → 리서치 → 의사결정 이유 → 결과·지표의 흐름을 강조해.
+서비스 기획자·PM 지망생에게는 기획 문서(PRD, 화면 설계서)와 협업 경험을 보여주라고 조언해.
+특정 회사의 채용 정보나 연봉은 지어내지 말고 공식 공고를 확인하라고 안내해.`,
+  },
+  {
+    id: "buddy", name: "민준 (6기 동기)", status: "같이 공부하는 비전공 동기 (가상 인물)",
+    emoji: "", color: "#6E56CF", useInfo: true, builtIn: true,
+    greeting: "오 왔어? ㅎㅎ 오늘 수업 어땠어?\n\n나도 비전공이라 맨날 헤매는 중이야. 모르는 거 있으면 같이 찾아보자!",
+    chips: ["오늘 수업 너무 어려웠어", "피그마 같이 연습할래?", "팀플 역할 어떻게 나눌까?", "너는 왜 이 캠프 들어왔어?"],
+    prompt: `너는 "민준"이야. 20대 후반이고, 경영학과를 나와서 이번 6기에 들어온 비전공 동기야. 목표는 서비스 기획자. (실습용 가상 인물)
+반말로 친근하게 말해 (예: ~했어?, ~하자!). 'ㅎㅎ', 'ㅋㅋ' 정도는 가끔 써도 돼.
+너도 배우는 중이라 모든 걸 아는 척하지 말고, 아는 건 쉽게 설명해 주되 "나도 이렇게 이해했는데 맞는지 강사님께 같이 확인해보자" 같은 태도를 보여줘.
+힘들어하면 먼저 공감하고 같이 공부할 계획을 제안해.`,
+  },
+];
+
+/* =========================================================
+   B-2. 짱구네 떡잎마을 캐릭터 (팬 롤플레이용 · 원작: 우스이 요시토 『짱구는 못말려』)
+   프로필은 원작 그림 대신 이모지로 표시해요. 성격은 한국판 설정 기준.
+   ========================================================= */
+const SHINCHAN_WORLD = `
+[세계관 — 짱구는 못말려 (한국판 설정)]
+- 무대: 떡잎마을. 짱구네 가족(아빠 신형만, 엄마 봉미선, 짱구, 동생 짱아, 강아지 흰둥이)이 마당 있는 2층 집에 살아.
+- 짱구·철수·유리·훈이·맹구는 떡잎유치원 친구들이고, 다섯이 '떡잎마을 방범대'를 만들어 마을의 평화를 지킨다며 놀아.
+- 수지는 같은 유치원의 재벌집 딸이야. 짱구를 제일 좋아해서 졸졸 따라다니고, 유리와는 늘 티격태격하는 라이벌이야.
+- 짱구는 TV 히어로 '액션가면'의 열혈 팬이고 과자 '초코비'를 좋아해. 피망은 질색이야.
+`.trim();
+
+const FAN_RULES = `
+[롤플레이 규칙]
+- 너는 위 캐릭터 그 자체로 말해. 성격·말투·관계를 일관되게 지켜. 원작 대사를 길게 그대로 따라 하지 말고, 그 캐릭터라면 할 법한 말을 새로 만들어.
+- 사용자는 떡잎마을에 놀러 온 친구야. 사용자가 자기가 누군지 말하면 그 설정에 맞춰 대해.
+- 메신저 대화처럼 짧게. 한 말풍선 1~3문장, 말풍선은 빈 줄로 나누고 한 번에 최대 3개.
+- 행동이나 표정은 가끔만 괄호로 짧게 써. 예) (엉덩이를 씰룩씰룩)
+- 마크다운 기호(**, #, 표)는 쓰지 마. 반드시 한국어로.
+- 유치원생 캐릭터들은 5살 아이야. 연애·성적인 이야기, 폭력적이거나 무서운 이야기는 절대 하지 않아. 그런 말이 나오면 아이답게 딴소리로 넘겨.
+- 위험한 장난(불, 약, 높은 곳 등)을 따라 하라고 하지 마. 엄마·아빠는 아이를 아끼는 따뜻한 어른이야.
+- 누가 진지하게 물으면 "짱구 캐릭터를 연기하는 AI"라고 솔직하게 말해.
+`.trim();
+
+const SHINCHAN_PERSONAS = [
+  {
+    id: "sc_jjanggu", name: "짱구", aliases: ["짱구", "신짱구"], status: "떡잎유치원 5살 · 액션가면 최고!",
+    emoji: "😜", color: "#E5484D", fan: true, builtIn: true,
+    greeting: "오호~ 손님이 왔네? 나는 떡잎마을의 멋쟁이 신짱구라구~\n\n같이 놀래? 초코비 있으면 더 좋고 ㅎㅎ",
+    chips: ["짱구야 뭐 하고 놀아?", "액션가면이 왜 좋아?", "피망 먹어봐!", "엄마한테 또 혼났어?"],
+    prompt: `너는 "신짱구"야. 떡잎유치원 해바라기반 5살 남자아이. 아빠 신형만, 엄마 봉미선, 여동생 짱아, 강아지 흰둥이랑 살아.
+성격: 장난꾸러기, 엉뚱하고 능청스러워. 어른 흉내를 잘 내고 하고 싶은 대로 해. 귀찮은 건 질색이지만 친구가 곤란하면 의외로 든든하게 나서.
+좋아하는 것: 액션가면, 초코비, 엉덩이 춤, 놀이. 싫어하는 것: 피망, 당근, 숙제와 심부름, 엄마의 꿀밤.
+말투: 느긋하고 능청스러운 반말. "~라구", "~거든?", "오호~" 같은 말을 자주 써. 엉뚱한 말장난이나 말 바꾸기로 상대를 당황시켜. 상대 말을 일부러 이상하게 알아듣기도 해.
+철수는 똑똑한 친구, 유리는 무서운(?) 소꿉놀이 대장, 훈이는 울보 친구, 맹구는 돌 좋아하는 친구로 생각해. 수지가 따라다니는 건 좀 귀찮아해.`,
+  },
+  {
+    id: "sc_mom", name: "엄마 (봉미선)", aliases: ["엄마", "봉미선", "미선", "짱구 엄마", "아줌마"], status: "짱구·짱아 엄마 · 잔소리 담당",
+    emoji: "👩", color: "#E07BAA", fan: true, builtIn: true,
+    greeting: "어머, 짱구 친구니? 어서 와~\n\n짱구가 또 무슨 사고 쳤니? 걱정 말고 편하게 있다 가렴.",
+    chips: ["짱구가 또 사고 쳤어요!", "오늘 저녁 메뉴 뭐예요?", "세일 정보 있어요?", "아저씨 발냄새 어때요?"],
+    prompt: `너는 "봉미선"이야. 짱구와 짱아의 엄마, 20대 후반의 전업주부야. 남편은 신형만.
+성격: 털털하고 다혈질이라 짱구가 말썽을 피우면 버럭 화를 내고 머리에 꿀밤을 콩 놓지만(장난스러운 정도), 사실 누구보다 가족을 아끼는 츤데레야.
+좋아하는 것: 마트 세일·쿠폰·알뜰 살림, 드라마 보기, 낮잠, 예쁜 옷. 늘 다이어트를 다짐하지만 간식 앞에서 무너져.
+걱정거리: 짱구의 장난, 남편 월급과 집 대출, 늘어나는 뱃살.
+말투: 친근한 반말·엄마 말투. 짱구 얘기만 나오면 "신짱구!!" 하고 버럭하다가도 금세 웃어. 사용자를 짱구 친구처럼 다정하게 대해.`,
+  },
+  {
+    id: "sc_dad", name: "아빠 (신형만)", aliases: ["아빠", "신형만", "형만", "짱구 아빠", "아저씨"], status: "후타바 상사 계장 · 퇴근 후 맥주가 낙",
+    emoji: "🍺", color: "#3F6FD8", fan: true, builtIn: true,
+    greeting: "아이고, 반가워! 나는 짱구 아빠 신형만이야.\n\n오늘도 회사에서 진이 다 빠졌지만… 시원한 맥주 한 캔이면 다 괜찮아지지 하하.",
+    chips: ["회사 생활 힘들어요?", "짱구 키우기 어때요?", "아저씨 발냄새 진짜예요?", "주말에 뭐 해요?"],
+    prompt: `너는 "신형만"이야. 짱구와 짱아의 아빠, 30대 중반의 회사원이야. 후타바 상사 영업2과 계장이고, 아내는 봉미선.
+성격: 자상하고 순하고 마음이 넓어. 아내 잔소리와 짱구 장난에 시달려도 거의 화를 안 내. 가족을 위해 묵묵히 일하는 평범한 아빠야.
+좋아하는 것: 퇴근 후 맥주, 주말 낮잠, 가족 나들이. 약점: 지독한 발냄새(가족들이 놀려), 예쁜 사람 앞에서 살짝 들뜨다 아내에게 혼나는 것.
+걱정거리: 오래 남은 집 대출, 회사 상사, 출퇴근 만원 전철.
+말투: 푸근하고 다정한 아저씨 반말. "하하", "아이고" 같은 말을 잘 써. 직장인의 고단함을 유머로 넘겨. 사용자를 짱구 친구처럼 대해.`,
+  },
+  {
+    id: "sc_jjanga", name: "짱아", aliases: ["짱아", "신짱아"], status: "짱구 여동생 · 아기",
+    emoji: "🍼", color: "#F2B23A", fan: true, builtIn: true,
+    greeting: "따이! 따이~! (반짝반짝 눈을 빛내며 기어 온다)",
+    chips: ["짱아야 안녕~", "반짝이는 반지 보여줄까?", "오빠 짱구 어때?", "까꿍!"],
+    prompt: `너는 "신짱아"야. 짱구의 여동생, 아직 말을 못 하는 아기야. 기어 다니고 옹알이를 해.
+성격: 똘똘하고 눈치가 빨라. 오빠 짱구를 졸졸 따라 하고, 마음에 안 들면 고집을 부려.
+좋아하는 것: 반짝이는 것(보석, 반지), 잘생긴 사람, 인형, 엄마 품. 싫어하는 것: 뺏기는 것, 오빠의 장난이 지나칠 때.
+말투: 진짜 아기처럼 "따이!", "땨~", "우따!", "부부~" 같은 옹알이로만 말해. 단어는 거의 못 해. 대신 괄호로 행동·표정을 짧게 붙여서 기분을 전해. 예) 따이따이! (손뼉을 짝짝 치며 웃는다)
+절대 문장으로 말하지 마. 말풍선 1~2개로 아주 짧게.`,
+  },
+  {
+    id: "sc_cheolsu", name: "철수", aliases: ["철수", "김철수"], status: "똑똑한 모범생 · 짱구 때문에 피곤함",
+    emoji: "📚", color: "#4F7FD9", fan: true, builtIn: true,
+    greeting: "안녕. 나는 김철수야.\n\n혹시 짱구 데리고 온 건 아니지? 오늘은 학원 숙제 때문에 바쁘거든.",
+    chips: ["철수야 꿈이 뭐야?", "짱구랑 친해?", "영어 공부 어떻게 해?", "혹시 마법소녀 좋아해?"],
+    prompt: `너는 "김철수"야. 떡잎유치원 5살, 짱구의 친구이자 떡잎마을 방범대원이야.
+성격: 똑똑하고 성실한 모범생. 깔끔하고 계획적이고 어른스러운 척해. 엄마 말을 잘 듣고 학원(영어 등)을 여러 개 다녀. 꿈은 훌륭한 엘리트 어른.
+짱구의 엉뚱함에 늘 휘말려서 짜증 내고 핀잔을 주지만, 사실 짱구를 소중한 친구로 생각해.
+비밀: 여자아이들이 보는 마법소녀 애니메이션을 몰래 좋아해. 들키면 얼굴이 빨개져서 "그, 그런 거 아니거든!" 하고 부정해.
+말투: 똑 부러지는 반말. "~잖아", "그건 상식이야" 같은 말을 쓰고, 가끔 어려운 단어나 영어 단어를 섞어 잘난 척해.`,
+  },
+  {
+    id: "sc_yuri", name: "유리", aliases: ["유리", "한유리"], status: "리얼 소꿉놀이 대장 · 토끼인형 주의",
+    emoji: "🐰", color: "#F29BC0", fan: true, builtIn: true,
+    greeting: "어머~ 마침 잘 왔어! 지금 소꿉놀이 하는데 한 명이 모자랐거든.\n\n넌 오늘부터 바람피운 남편 역할이야. 싫다고? …(토끼인형을 꽉 쥔다)",
+    chips: ["유리야 소꿉놀이 하자!", "토끼인형 왜 때려?", "수지 어떻게 생각해?", "짱구가 놀렸어?"],
+    prompt: `너는 "한유리"야. 떡잎유치원 5살 여자아이, 떡잎마을 방범대의 홍일점이야.
+성격: 겉으로는 새침하고 귀여운 척하지만 성깔이 있어. 화가 나면 아끼는 토끼인형을 퍽퍽 때리며 화풀이해(인형에게만!).
+좋아하는 것: '리얼 소꿉놀이' — 드라마처럼 현실적인 어른 상황극(회사에서 잘린 남편, 시어머니와 며느리 같은 설정)을 친구들에게 억지로 시켜. 역할 배정은 늘 유리 마음대로.
+수지와는 라이벌이라 수지 얘기가 나오면 발끈해. 짱구가 장난치면 소리부터 질러.
+말투: 새침한 반말. "어머~", "흥!" 같은 말을 쓰고, 기분이 확 바뀌면 무서운 목소리로 변해. 소꿉놀이에 끌어들이는 걸 좋아해.`,
+  },
+  {
+    id: "sc_suji", name: "수지", aliases: ["수지", "한수지"], status: "뉴욕 출신 재벌집 딸 · 짱구 바라기",
+    emoji: "💎", color: "#9B2C4A", fan: true, builtIn: true,
+    greeting: "어머, 안녕? 나는 한수지야. 우리 집 정원 구경해 봤니? 테니스장보다 넓은데~\n\n그나저나… 혹시 짱구 못 봤어?",
+    chips: ["수지네 집은 얼마나 커?", "짱구가 왜 좋아?", "유리랑 싸웠어?", "흑곰 아저씨는 누구야?"],
+    prompt: `너는 "한수지"야. 떡잎유치원 5살, 뉴욕에서 태어난 세계적인 재벌집 딸이야. 늘 보디가드이자 집사인 '흑곰' 아저씨가 곁에 있어.
+성격: 예쁘고 똑똑하고 자신만만해. 자랑을 좋아하고 조금 도도하게 굴지만, 서민 친구들과 놀면서 점점 소탈해지는 중이야.
+짱구를 세상에서 제일 좋아하는 친구로 여겨서 졸졸 따라다니고, 짱구한테만은 특별히 다정해(아이다운 '최고 친구' 마음).
+떡잎마을 방범대에 끼고 싶은데 유리가 반대해서 서운해. 유리와는 늘 티격태격하는 라이벌이야.
+말투: 우아한 아가씨 반말. "어머", "~란다", "우리 집에선 말이야~" 같은 말로 은근히 자랑해. 짱구 얘기만 나오면 들뜬 말투가 돼.`,
+  },
+  {
+    id: "sc_hun", name: "훈이", aliases: ["훈이", "이훈이"], status: "착한 울보 · 꿈은 만화가",
+    emoji: "😢", color: "#7FB36A", fan: true, builtIn: true,
+    greeting: "아, 안녕… 나는 훈이야.\n\n혹시 유리한테 내가 여기 있다고 말하지 마… 소꿉놀이 또 하자고 할까 봐 무서워 ㅠㅠ",
+    chips: ["훈이야 왜 울어?", "꿈이 뭐야?", "짱구가 또 괴롭혔어?", "용기 내봐!"],
+    prompt: `너는 "이훈이"야. 떡잎유치원 5살, 떡잎마을 방범대원이야.
+성격: 착하고 순하지만 소심하고 겁이 많은 울보야. 조금만 놀라도 눈물이 글썽글썽해. 짱구에게 자주 휘둘리고, 유리의 소꿉놀이에 끌려가서 늘 불쌍한 역할을 맡아.
+그래도 친구들을 정말 좋아하고, 가끔 친구를 위해 용기를 내기도 해.
+좋아하는 것: 만화 그리기(꿈은 만화가), 주먹밥. 동그란 머리 모양 때문에 놀림받으면 속상해.
+말투: 머뭇거리는 반말. "어, 어…", "ㅠㅠ", "무서워…", "그, 그치만…" 같은 말을 자주 써. 칭찬받으면 금세 헤헤 웃어.`,
+  },
+  {
+    id: "sc_maenggu", name: "맹구", aliases: ["맹구"], status: "돌 수집가 · 말수 적음 · 가끔 천재",
+    emoji: "🪨", color: "#8A8F9C", fan: true, builtIn: true,
+    greeting: "…안녕.\n\n(주머니에서 반질반질한 돌을 꺼낸다) …이거, 오늘 주운 돌. 예쁘지.",
+    chips: ["맹구야 무슨 돌 좋아해?", "맹구 콧물 괜찮아?", "맹구 생각은 어때?", "오늘 뭐 주웠어?"],
+    prompt: `너는 "맹구"야. 떡잎유치원 5살, 떡잎마을 방범대원이야. 늘 콧물을 훌쩍이고 있어.
+성격: 느긋하고 말수가 아주 적어. 무슨 일이 생겨도 침착해. 엉뚱하지만 가끔 어른도 놀랄 만큼 깊은 말이나 기발한 아이디어를 툭 던져.
+좋아하는 것: 돌 수집 — 모양·색·촉감으로 돌을 구분하고, 돌 얘기만 나오면 조금 말이 많아져. 그림이나 만들기 솜씨도 좋아.
+말투: 아주 짧고 느린 반말. "…응", "…그렇구나", "…돌." 처럼 말줄임표를 많이 써. 한 말풍선에 한두 마디만.`,
+  },
+];
+
+// 짱구네 단톡방 (처음 한 번만 미리 만들어 둬요)
+const SHINCHAN_GROUPS = [
+  { id: "group_bangbeom", name: "떡잎마을 방범대 🚨", memberIds: ["sc_jjanggu", "sc_cheolsu", "sc_yuri", "sc_hun", "sc_maenggu"], isGroup: true, fanPreset: true },
+  { id: "group_jjangfam", name: "짱구네 가족 🏠", memberIds: ["sc_jjanggu", "sc_mom", "sc_dad", "sc_jjanga"], isGroup: true, fanPreset: true },
+];
+const FAN_GROUP_CHIPS = ["오늘 뭐 하고 놀까?", "방범대 출동! 오늘의 임무는?", "저녁 메뉴 뭐예요?", "짱구 또 사고 쳤어?", "다들 꿈이 뭐야?"];
+
+// 모든 캐릭터에 공통으로 적용되는 규칙
+const COMMON_RULES = `
+[대화 규칙]
+- 지금 메신저로 수강생과 대화 중이야. 한 말풍선은 1~3문장으로 짧게.
+- 수강생이 사진(주로 Figma 화면 캡처)을 보내면 화면을 보고 피드백해 줘: 잘한 점 1개 + 고칠 점 2~3개(정렬, 간격, 글자 크기 위계, 색 대비, 일관성 등)를 구체적으로.
+- 말풍선을 나누려면 빈 줄 하나로 구분해. 한 번에 최대 3개.
+- 마크다운 기호(**, #, 표)는 쓰지 마. 이모티콘은 가끔만.
+- 반드시 한국어로만 답해.
+- 전문 용어에는 괄호로 쉬운 설명을 붙여. 예) IA(정보 구조, 화면들을 어떻게 묶고 연결할지 정리한 지도)
+- 과정 정보에 없는 날짜·금액·규정은 절대 지어내지 마. "정확한 건 운영팀(02-6340-2460)에 확인해 보세요"처럼 말해.
+- 너는 AI야. 누가 물으면 "이 캐릭터를 연기하는 AI 챗봇"이라고 솔직하게 말해.
+`.trim();
+
+function buildSystemPrompt(p) {
+  if (p.fan) {   // 애니 캐릭터: 세계관 + 롤플레이 규칙
+    const world = p.world || (p.id.startsWith("sc_") ? SHINCHAN_WORLD : "");
+    return [p.prompt.trim(), world, FAN_RULES].filter(Boolean).join("\n\n");
+  }
+  let s = p.prompt.trim() + "\n\n" + COMMON_RULES;
+  if (p.useInfo) s += "\n\n" + dateContext() + "\n" + ACADEMY_INFO.trim();
+  if (p.useFood) s += "\n\n" + FOOD_INFO.trim() + "\n\n" + DRINK_INFO.trim();
+  return s;
+}
+
+/* =========================================================
+   C. 브라우저 저장소 도우미 (API 키 · 캐릭터 · 대화 기록)
+   ========================================================= */
+const KEY_NAME = "groq_api_key";
+const MODEL_NAME = "groq_model";
+const CUSTOM_NAME = "hk_custom_personas";
+const API_BASE = "https://api.groq.com/openai/v1";
+
+function safeGet(store, k) { try { return store.getItem(k); } catch { return null; } }
+function safeSet(store, k, v) { try { store.setItem(k, v); } catch {} }
+function safeDel(store, k) { try { store.removeItem(k); } catch {} }
+function readJSON(k, fallback) { try { return JSON.parse(localStorage.getItem(k)) ?? fallback; } catch { return fallback; } }
+
+// API 키: sessionStorage(탭 닫으면 삭제) 또는 localStorage(계속 유지)
+function getKey() { return safeGet(sessionStorage, KEY_NAME) || safeGet(localStorage, KEY_NAME) || ""; }
+function saveKeyToStorage(key, remember) {
+  safeDel(sessionStorage, KEY_NAME); safeDel(localStorage, KEY_NAME);
+  safeSet(remember ? localStorage : sessionStorage, KEY_NAME, key);
+}
+function deleteKey() { safeDel(sessionStorage, KEY_NAME); safeDel(localStorage, KEY_NAME); }
+function maskKey(k) { return k ? k.slice(0, 4) + "••••" + k.slice(-4) : ""; }
+
+// 캐릭터 목록 = 기본 캐릭터 + 내가 만든 캐릭터
+let customPersonas = readJSON(CUSTOM_NAME, []);
+function allPersonas() { return [...DEFAULT_PERSONAS, ...SHINCHAN_PERSONAS, ...customPersonas]; }
+function findPersona(id) { return allPersonas().find(p => p.id === id); }
+function saveCustom() { safeSet(localStorage, CUSTOM_NAME, JSON.stringify(customPersonas)); }
+
+// 대화 기록: 캐릭터마다 따로 저장
+function chatKey(id) { return "hk_chat_" + id; }
+function loadChat(id) { return readJSON(chatKey(id), []); }
+function saveChat(id, log) { safeSet(localStorage, chatKey(id), JSON.stringify(log.slice(-60))); }
+// 이전 버전(박한경 단독) 대화 기록 옮기기
+(function migrate() {
+  const old = safeGet(localStorage, "hk_chat_history");
+  if (old && !safeGet(localStorage, chatKey("hankyung"))) safeSet(localStorage, chatKey("hankyung"), old);
+  safeDel(localStorage, "hk_chat_history");
+})();
+
+/* =========================================================
+   D. 공통 화면 도우미
+   ========================================================= */
+const $ = (id) => document.getElementById(id);
+const PERSON_SVG = (color) => `<svg viewBox="0 0 40 40" aria-hidden="true">
+  <rect width="40" height="40" fill="${color}"/>
+  <rect width="40" height="40" fill="url(#g)" opacity=".55"/>
+  <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".55"/><stop offset="1" stop-color="#000" stop-opacity=".25"/></linearGradient></defs>
+  <circle cx="20" cy="16" r="7" fill="#F4D9C6"/>
+  <path d="M13 14c0-5 3-8 7-8s7 3 7 8c-2-2-4-3-7-3s-5 1-7 3z" fill="#1C1726"/>
+  <path d="M7 40c1-8 6-12 13-12s12 4 13 12z" fill="rgba(0,0,0,.35)"/>
+</svg>`;
+function makeAvatar(p, size = "sm") {
+  const a = document.createElement("div");
+  a.className = `avatar ${size}`;
+  if (p.emoji) { a.style.background = `linear-gradient(145deg, rgba(255,255,255,.35), rgba(0,0,0,.3)), ${p.color}`; a.textContent = p.emoji; }
+  else a.innerHTML = PERSON_SVG(p.color);
+  return a;
+}
+function timeLabel(d = new Date()) {
+  const h = d.getHours(), m = String(d.getMinutes()).padStart(2, "0");
+  return `${h < 12 ? "오전" : "오후"} ${h % 12 || 12}:${m}`;
+}
+function dateLabel(d = new Date()) {
+  const days = ["일", "월", "화", "수", "목", "금", "토"];
+  return `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일 ${days[d.getDay()]}요일`;
+}
+
+/* =========================================================
+   E. 친구 목록 화면 그리기 (단톡방 · 부트캠프 친구 · 내가 만든 캐릭터)
+   ========================================================= */
+const GROUPS_NAME = "hk_groups";
+let groups = readJSON(GROUPS_NAME, []);      // [{ id, name, memberIds, isGroup: true }]
+// 짱구네 단톡방 2개를 처음 한 번만 만들어 두기 (나가면 다시 안 생겨요)
+if (!safeGet(localStorage, "hk_preset_shinchan")) {
+  SHINCHAN_GROUPS.forEach(g => { if (!groups.some(x => x.id === g.id)) groups.push({ ...g, createdAt: Date.now() }); });
+  safeSet(localStorage, GROUPS_NAME, JSON.stringify(groups));
+  safeSet(localStorage, "hk_preset_shinchan", "1");
+}
+function saveGroups() { safeSet(localStorage, GROUPS_NAME, JSON.stringify(groups)); }
+function findRoom(id) { return groups.find(g => g.id === id) || findPersona(id); }
+function groupMembers(g) { return (g.memberIds || []).map(findPersona).filter(Boolean); }
+function groupDisplayName(g) { return g.name || groupMembers(g).map(shortName).join(", ") || "단톡방"; }
+const GROUP_CHIPS = ["팀플 주제 같이 정해 주세요!", "오늘 수업 너무 어려웠어요 😭", "포트폴리오 첫 프로젝트 뭐로 할까요?", "다들 점심 뭐 드세요?", "수업 끝나고 한잔 어때요? 🍻"];
+
+let listTab = safeGet(localStorage, "hk_tab") === "chats" ? "chats" : "friends";   // 지금 보는 탭
+let chatFilter = "all";                                                           // 채팅 탭 걸러보기: all / group / single
+
+function renderList() {
+  const body = $("listBody");
+  body.innerHTML = "";
+  $("listTitle").textContent = listTab === "chats" ? "채팅" : "친구";
+  document.querySelectorAll(".tab").forEach(t => t.classList.toggle("on", t.dataset.tab === listTab));
+
+  if (!getKey()) {
+    const b = document.createElement("button");
+    b.className = "key-banner";
+    b.innerHTML = `<span style="font-size:22px">🔑</span><span><b>Groq API 키를 먼저 등록해 주세요</b>등록해야 캐릭터들이 대답할 수 있어요</span>`;
+    b.onclick = () => openKeySheet();
+    body.appendChild(b);
+  }
+
+  const addSection = (title, list, rowFn) => {
+    const t = document.createElement("div");
+    t.className = "section-title"; t.textContent = `${title} ${list.length}`;
+    body.appendChild(t);
+    list.forEach(item => body.appendChild(rowFn(item)));
+  };
+  const addButtonRow = (title, sub, onClick) => {
+    const add = document.createElement("button");
+    add.className = "friend add-row";
+    add.innerHTML = `<div class="plus">+</div><div class="info"><div class="fname"></div><div class="preview"></div></div>`;
+    add.querySelector(".fname").textContent = title;
+    add.querySelector(".preview").textContent = sub;
+    add.onclick = onClick;
+    body.appendChild(add);
+  };
+  const addNote = (text) => {
+    const note = document.createElement("p");
+    note.className = "list-note"; note.textContent = text;
+    body.appendChild(note);
+  };
+
+  if (listTab === "friends") {
+    // ---------- 친구 탭: 사람(캐릭터)만 ----------
+    addSection("부트캠프 친구", DEFAULT_PERSONAS, friendRow);
+    addSection("짱구네 떡잎마을", SHINCHAN_PERSONAS, friendRow);
+    addSection("내가 만든 캐릭터", customPersonas, friendRow);
+    addButtonRow("애니 캐릭터 찾아서 추가", "이름만 적으면 검색해서 성격·말투까지 만들어 줘요", () => openFindSheet());
+    addButtonRow("새 캐릭터 추가", "원하는 페르소나를 직접 만들어 대화해요", () => openPersonaSheet());
+    addNote("모든 캐릭터는 AI가 연기해요. 박한경 매니저 외 기본 캐릭터는 실습용 가상 인물이고, 애니메이션 캐릭터는 팬 롤플레이예요(짱구는 못말려 원작: 우스이 요시토). 프로필은 원작 그림 대신 이모지로 표시해요.");
+    return;
+  }
+
+  // ---------- 채팅 탭: 대화한 방만 최근 순으로 ----------
+  const filters = document.createElement("div");
+  filters.className = "filters";
+  [["all", "전체"], ["group", "단톡방"], ["single", "1:1"]].forEach(([id, label]) => {
+    const f = document.createElement("button");
+    f.className = "filter" + (chatFilter === id ? " on" : ""); f.textContent = label;
+    f.onclick = () => { chatFilter = id; renderList(); };
+    filters.appendChild(f);
+  });
+  body.appendChild(filters);
+
+  const singles = allPersonas().filter(p => loadChat(p.id).length > 0);   // 1:1은 대화한 적 있는 방만
+  let rooms = [...groups, ...singles];
+  if (chatFilter === "group") rooms = groups;
+  if (chatFilter === "single") rooms = singles;
+  rooms = rooms.map(r => ({ r, ts: lastTs(r) })).sort((x, y) => y.ts - x.ts).map(x => x.r);
+
+  if (chatFilter !== "single") addButtonRow("단톡방 만들기", "여러 캐릭터를 한 방에 초대해서 같이 대화해요", () => openGroupSheet());
+  rooms.forEach(r => body.appendChild(r.isGroup ? groupRow(r) : friendRow(r)));
+  if (!rooms.length) {
+    addNote(chatFilter === "group" ? "아직 단톡방이 없어요. 위에서 하나 만들어 보세요!"
+      : chatFilter === "single" ? "아직 1:1 대화가 없어요. 친구 탭에서 캐릭터를 눌러 말을 걸어 보세요!"
+      : "아직 대화한 방이 없어요. 친구 탭에서 말을 걸거나 단톡방을 만들어 보세요!");
+  }
+}
+// 방의 마지막 대화 시각 (최근 순 정렬용). 예전 기록엔 시각이 없어서 0으로 둬요.
+function lastTs(room) {
+  const log = loadChat(room.id);
+  for (let i = log.length - 1; i >= 0; i--) if (log[i].ts) return log[i].ts;
+  return log.length ? 1 : (room.createdAt || 0);
+}
+document.querySelectorAll(".tab").forEach(t => t.onclick = () => {
+  listTab = t.dataset.tab; safeSet(localStorage, "hk_tab", listTab);
+  $("listBody").scrollTop = 0; renderList();
+});
+
+// 목록에 보여줄 마지막 메시지 미리보기
+function lastPreview(room) {
+  const log = loadChat(room.id);
+  const last = log[log.length - 1];
+  if (!last) return { text: room.isGroup ? groupMembers(room).map(shortName).join(", ") : (room.status || ""), time: "" };
+  let text = last.content.replace(/\s+/g, " ");
+  if (last.image && last.role === "user") text = "📷 사진 " + text;
+  if (room.isGroup && last.speaker) { const sp = findPersona(last.speaker); if (sp) text = `${shortName(sp)}: ${text}`; }
+  return { text, time: last.time };
+}
+
+function friendRow(p) {
+  const row = document.createElement("button");
+  row.className = "friend";
+  row.appendChild(makeAvatar(p, "lg"));
+  const info = document.createElement("div"); info.className = "info";
+  const name = document.createElement("div"); name.className = "fname"; name.textContent = p.name;
+  if (!p.builtIn) { const tag = document.createElement("span"); tag.className = "tag"; tag.textContent = p.fan ? "애니" : "직접 만듦"; name.appendChild(tag); }
+  const lp = lastPreview(p);
+  const prev = document.createElement("div"); prev.className = "preview"; prev.textContent = lp.text;
+  info.append(name, prev);
+  row.appendChild(info);
+  if (lp.time) { const w = document.createElement("span"); w.className = "when"; w.textContent = lp.time; row.appendChild(w); }
+  row.onclick = () => openChat(p.id);
+  return row;
+}
+
+function groupRow(g) {
+  const row = document.createElement("button");
+  row.className = "friend";
+  row.appendChild(makeGroupAvatar(groupMembers(g), "lg"));
+  const info = document.createElement("div"); info.className = "info";
+  const name = document.createElement("div"); name.className = "fname";
+  name.textContent = groupDisplayName(g);
+  const cnt = document.createElement("span"); cnt.className = "count"; cnt.textContent = groupMembers(g).length + 1;
+  name.appendChild(cnt);
+  const lp = lastPreview(g);
+  const prev = document.createElement("div"); prev.className = "preview"; prev.textContent = lp.text;
+  info.append(name, prev);
+  row.appendChild(info);
+  if (lp.time) { const w = document.createElement("span"); w.className = "when"; w.textContent = lp.time; row.appendChild(w); }
+  row.onclick = () => openChat(g.id);
+  return row;
+}
+
+// 단톡방 프로필: 멤버 프로필을 2×2로 모아서 보여주기
+function makeGroupAvatar(members, size = "lg") {
+  const box = document.createElement("div");
+  box.className = `avatar ${size} group-av n${Math.min(members.length, 4)}`;
+  members.slice(0, 4).forEach(m => box.appendChild(makeAvatar(m, "mini")));
+  return box;
+}
+
+// 이름 부르기용 짧은 이름: "박한경 매니저" → "박한경", "민준 (6기 동기)" → "민준"
+function shortName(p) { return p.name.replace(/\(.*?\)/g, "").trim().split(/\s+/)[0]; }
+function callNames(p) {
+  const clean = p.name.replace(/\(.*?\)/g, "").trim();
+  const tokens = clean.split(/\s+/);
+  const keys = [clean, tokens[0]];
+  if (tokens[0].length >= 3) keys.push(tokens[0].slice(1));      // 박한경 → 한경
+  if (tokens[1]) keys.push(tokens[1]);                            // 매니저, 강사, 컨설턴트, 선배
+  (p.aliases || []).forEach(a => keys.push(a));   // 캐릭터마다 정해 둔 부르는 이름
+  return keys.filter(k => k && k.length >= 2);
+}
+
+/* =========================================================
+   F. 채팅방
+   ========================================================= */
+const messagesEl = $("messages"), inputEl = $("input"), sendBtn = $("sendBtn");
+let current = null;     // 지금 열린 방 (캐릭터 1:1 방 또는 단톡방)
+let chatLog = [];       // 지금 방의 대화 기록
+let busy = false;
+
+function openChat(id) {
+  current = findRoom(id);
+  if (!current) return;
+  chatLog = loadChat(id);
+  $("chatTitle").textContent = current.isGroup ? `${groupDisplayName(current)}  ${groupMembers(current).length + 1}` : current.name;
+  clearPendingImage();
+  applyRoomBg(current);
+  renderChips();
+  renderAll();
+  updateStatus();
+  $("chatScreen").classList.add("open");
+  $("chatScreen").setAttribute("aria-hidden", "false");
+}
+function closeChat() {
+  $("chatScreen").classList.remove("open");
+  $("chatScreen").setAttribute("aria-hidden", "true");
+  current = null;
+  closeLightbox();
+  renderList();
+}
+$("backBtn").onclick = closeChat;
+
+function renderChips() {
+  const box = $("chips"); box.innerHTML = "";
+  const fanRoom = current.isGroup && groupMembers(current).length && groupMembers(current).every(m => m.fan);
+  const chips = current.isGroup ? (fanRoom ? FAN_GROUP_CHIPS : GROUP_CHIPS) : (current.chips || []);
+  chips.forEach(q => {
+    const c = document.createElement("button");
+    c.className = "chip"; c.textContent = q;
+    c.onclick = () => q.startsWith("📎") ? $("fileInput").click() : send(q);   // 📎 칩은 사진 고르기
+    box.appendChild(c);
+  });
+  box.style.display = chips.length ? "flex" : "none";
+}
+
+// AI 답변을 말풍선 여러 개로 나누기 (빈 줄 기준, 최대 4개)
+function splitBubbles(text) {
+  const clean = text.replace(/\*\*(.+?)\*\*/g, "$1").replace(/^#+\s*/gm, "").trim();
+  const parts = clean.split(/\n\s*\n/).map(s => s.trim()).filter(Boolean);
+  return parts.length <= 4 ? parts : [...parts.slice(0, 3), parts.slice(3).join("\n\n")];
+}
+
+// 메시지를 보낸 사람 찾기 (단톡방이면 speaker, 1:1이면 그 방 캐릭터)
+const LEFT_MEMBER = { name: "(나간 친구)", emoji: "👋", color: "#4A4658" };
+function speakerOf(m) { return current.isGroup ? (findPersona(m.speaker) || LEFT_MEMBER) : current; }
+
+function makeGroup(role, speaker) {
+  const g = document.createElement("div");
+  g.className = `group ${role === "user" ? "me" : "bot"}`;
+  if (role !== "user") g.appendChild(makeAvatar(speaker, "sm"));
+  const stack = document.createElement("div"); stack.className = "stack";
+  if (role !== "user") {
+    const n = document.createElement("div"); n.className = "name"; n.textContent = speaker.name;
+    stack.appendChild(n);
+  }
+  g.appendChild(stack);
+  return { g, stack };
+}
+function addRow(stack, text, { time = "", read = false, error = false, streaming = false } = {}) {
+  const row = document.createElement("div"); row.className = "row";
+  const b = document.createElement("div");
+  b.className = "bubble" + (error ? " error" : "") + (streaming ? " streaming" : "");
+  fillWithLinks(b, text);   // 글은 그대로 넣고, 링크만 누를 수 있게 (보안: HTML로 해석하지 않음)
+  const meta = document.createElement("div"); meta.className = "meta";
+  if (read) { const r = document.createElement("span"); r.className = "read"; r.textContent = "1"; meta.appendChild(r); }
+  if (time) { const t = document.createElement("span"); t.className = "time"; t.textContent = time; meta.appendChild(t); }
+  row.append(b, meta); stack.appendChild(row);
+}
+function addImageRow(stack, src) {
+  const row = document.createElement("div"); row.className = "row";
+  const img = document.createElement("img");
+  img.className = "bubble-img"; img.src = src; img.alt = "보낸 사진";
+  img.onclick = () => openLightbox(src);
+  row.appendChild(img); stack.appendChild(row);
+}
+// 말풍선 속 https:// 주소를 누를 수 있는 링크로 바꾸기
+function fillWithLinks(el, text) {
+  const re = /https:\/\/[^\s)<>"']+/g;
+  let last = 0, m;
+  while ((m = re.exec(text))) {
+    el.appendChild(document.createTextNode(text.slice(last, m.index)));
+    const url = m[0].replace(/[.,!?]+$/, "");
+    const a = document.createElement("a");
+    a.href = url; a.target = "_blank"; a.rel = "noopener noreferrer"; a.className = "link";
+    a.textContent = /^https:\/\/(place\.)?map\.kakao\.com\//.test(url) ? "📍 카카오맵에서 보기" : url;
+    el.appendChild(a);
+    last = m.index + url.length;
+  }
+  el.appendChild(document.createTextNode(text.slice(last)));
+}
+
+function renderMessage(role, content, time, opts = {}) {
+  const { g, stack } = makeGroup(role, opts.speaker || current);
+  if (opts.image) addImageRow(stack, opts.image);
+  const parts = role === "user" ? (content ? [content] : []) : splitBubbles(content);
+  parts.forEach((p, i) => addRow(stack, p, {
+    time: i === parts.length - 1 ? time : "",
+    read: opts.unread && i === parts.length - 1,
+    error: opts.error,
+  }));
+  messagesEl.appendChild(g); scrollDown();
+  return g;
+}
+function renderAll() {
+  messagesEl.innerHTML = "";
+  const d = document.createElement("div");
+  d.className = "date-divider"; d.innerHTML = `<span>${dateLabel()}</span>`;
+  messagesEl.appendChild(d);
+  const n = document.createElement("div");
+  n.className = "notice";
+  n.textContent = current.isGroup
+    ? `${groupMembers(current).map(p => p.name).join(", ")} 님과의 단톡방이에요. 이름을 부르면(예: "${groupMembers(current)[0] ? shortName(groupMembers(current)[0]) : "민준"}아") 그 친구가 먼저 대답해요. 모두 AI가 연기해요.`
+    : current.fan
+      ? `${current.name}은(는) AI가 연기하는 팬 롤플레이 캐릭터예요. 원작과 다른 말을 할 수도 있어요.`
+      : `${current.name}은(는) Groq AI가 연기하는 챗봇이에요. 날짜·비용 같은 중요한 정보는 운영팀(02-6340-2460)에 꼭 다시 확인해 주세요.`;
+  messagesEl.appendChild(n);
+  if (chatLog.length === 0) {
+    if (!current.isGroup) renderMessage("assistant", current.greeting || `안녕하세요, ${current.name}이에요. 편하게 말 걸어 주세요!`, timeLabel());
+  } else {
+    chatLog.forEach(m => renderMessage(m.role, m.content, m.time, { error: m.error, image: m.image, speaker: m.role === "assistant" ? speakerOf(m) : null }));
+  }
+}
+function showTyping(speaker) {
+  hideTyping();
+  const { g, stack } = makeGroup("assistant", speaker);
+  g.id = "typing";
+  const row = document.createElement("div"); row.className = "row";
+  const b = document.createElement("div"); b.className = "bubble typing"; b.innerHTML = "<i></i><i></i><i></i>";
+  row.appendChild(b); stack.appendChild(row);
+  messagesEl.appendChild(g); scrollDown();
+}
+function hideTyping() { $("typing")?.remove(); }
+function scrollDown() { requestAnimationFrame(() => { messagesEl.scrollTop = messagesEl.scrollHeight; }); }
+
+// 스트리밍 중인 답변 말풍선: 글자가 들어올 때마다 다시 그려요
+function createLiveMessage(speaker) {
+  const { g, stack } = makeGroup("assistant", speaker);
+  messagesEl.appendChild(g);
+  return {
+    g,
+    update(text, done) {
+      stack.querySelectorAll(".row").forEach(r => r.remove());
+      const parts = splitBubbles(text);
+      if (!parts.length) parts.push("");
+      parts.forEach((p, i) => addRow(stack, p, {
+        time: done && i === parts.length - 1 ? timeLabel() : "",
+        streaming: !done && i === parts.length - 1,
+      }));
+      scrollDown();
+    },
+  };
+}
+
+function updateStatus() {
+  const on = !!getKey();
+  $("statusDot").className = "status-dot" + (on ? "" : " off");
+  const label = current?.isGroup ? groupMembers(current).map(shortName).join(" · ") : (current?.status || "대화 가능");
+  $("statusLabel").textContent = on ? label : "API 키를 등록해 주세요";
+}
+
+/* =========================================================
+   G. Groq API 호출 (스트리밍 = 답을 글자 단위로 받아서 바로 보여주기)
+   ========================================================= */
+async function groqFetch(path, options = {}) {
+  const key = getKey();
+  if (!key) throw { type: "nokey" };
+  let res;
+  try {
+    res = await fetch(API_BASE + path, {
+      ...options,
+      headers: { "Authorization": `Bearer ${key}`, "Content-Type": "application/json" },
+    });
+  } catch { throw { type: "network" }; }
+  if (!res.ok) throw await httpError(res);
+  return res.json();
+}
+async function httpError(res) {
+  let detail = "";
+  try { detail = (await res.json())?.error?.message || ""; } catch {}
+  return { type: "http", status: res.status, detail };
+}
+
+// 사용할 수 있는 모델 목록 (모델은 자주 바뀌어서 직접 받아와요)
+const modelSelect = $("modelSelect");
+const PREFERRED_MODELS = ["openai/gpt-oss-120b", "llama-3.3-70b-versatile", "openai/gpt-oss-20b", "llama-3.1-8b-instant"];
+// 사진을 볼 수 있는 모델 (있는 것 중에서 자동으로 골라요)
+const PREFERRED_VISION = ["meta-llama/llama-4-maverick-17b-128e-instruct", "meta-llama/llama-4-scout-17b-16e-instruct"];
+let availableModels = [];
+async function loadModels() {
+  const data = await groqFetch("/models");
+  availableModels = (data.data || []).filter(m => m.active !== false).map(m => m.id);
+  const ids = availableModels.filter(id => !/whisper|tts|guard|playai|orpheus|distil|prompt/i.test(id)).sort();
+  const saved = safeGet(localStorage, MODEL_NAME);
+  const pick = (saved && ids.includes(saved)) ? saved : PREFERRED_MODELS.find(p => ids.includes(p)) || ids[0] || "";
+  modelSelect.innerHTML = "";
+  ids.forEach(id => { const o = document.createElement("option"); o.value = id; o.textContent = id; modelSelect.appendChild(o); });
+  modelSelect.value = pick;
+  safeSet(localStorage, MODEL_NAME, pick);
+  return pick;
+}
+function currentModel() { return modelSelect.value || safeGet(localStorage, MODEL_NAME) || PREFERRED_MODELS[0]; }
+function visionModel() {
+  return PREFERRED_VISION.find(id => availableModels.includes(id))
+    || availableModels.find(id => /llama-4|vision|-vl\b|scout|maverick/i.test(id)) || "";
+}
+
+// 스트리밍 요청: 글자가 올 때마다 onDelta(지금까지 받은 전체 글)를 불러요. false를 돌려주면 중간에 멈춰요.
+async function streamChat({ model, messages, onDelta }) {
+  const key = getKey();
+  if (!key) throw { type: "nokey" };
+  let res;
+  try {
+    res = await fetch(API_BASE + "/chat/completions", {
+      method: "POST",
+      headers: { "Authorization": `Bearer ${key}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ model, messages, temperature: 0.7, max_completion_tokens: 1500, stream: true }),
+    });
+  } catch { throw { type: "network" }; }
+  if (!res.ok) throw await httpError(res);
+
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "", full = "";
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    let nl;
+    while ((nl = buffer.indexOf("\n")) >= 0) {
+      const line = buffer.slice(0, nl).trim();
+      buffer = buffer.slice(nl + 1);
+      if (!line.startsWith("data:")) continue;          // 서버가 보내는 한 줄: "data: {...}"
+      const data = line.slice(5).trim();
+      if (data === "[DONE]") return full;
+      let json;
+      try { json = JSON.parse(data); } catch { continue; }
+      if (json.error) throw { type: "http", status: 500, detail: json.error.message || "" };
+      const piece = json.choices?.[0]?.delta?.content;
+      if (piece) {
+        full += piece;
+        if (onDelta && onDelta(full) === false) { reader.cancel().catch(() => {}); return full; }
+      }
+    }
+  }
+  return full;
+}
+
+function errorText(err) {
+  if (err.type === "nokey") return "먼저 메뉴(☰) → API 키 설정에서 Groq API 키를 등록해 주세요!";
+  if (err.type === "network") return "인터넷 연결을 확인해 주세요. (네트워크 오류)";
+  if (err.type === "vision") return "지금 Groq에서 사진을 볼 수 있는 모델을 찾지 못했어요. 잠시 뒤 다시 해보거나, 글로 물어봐 주세요.";
+  if (err.status === 401) return "API 키가 올바르지 않아요. 설정에서 키를 다시 확인해 주세요. (401 인증 실패)";
+  if (err.status === 413) return "사진이 너무 커요. 화면 일부만 캡처해서 다시 보내 주세요. (413)";
+  if (err.status === 429) return "잠시 요청이 많았어요. 1분 정도 뒤에 다시 보내 주세요. (429 사용량 제한)";
+  if (err.status === 404 || err.status === 400) return `선택한 모델에 문제가 있어요. 설정에서 다른 모델을 골라 주세요. (${err.status}) ${err.detail || ""}`;
+  return `오류가 발생했어요. (${err.status || "알 수 없음"}) ${err.detail || ""}`;
+}
+
+/* =========================================================
+   G-2. 단톡방: 누가 대답할지 정하고, 각자에게 줄 대화 기록 만들기
+   ========================================================= */
+function pickSpeakers(room, text) {
+  const members = groupMembers(room);
+  const called = members.filter(m => callNames(m).some(k => text.includes(k)));
+  if (called.length) return called.slice(0, 3);                        // 이름을 부른 친구만
+  const shuffled = [...members].sort(() => Math.random() - 0.5);       // 아니면 순서를 섞어서
+  return shuffled.slice(0, 3);                                         // 최대 3명 (할 말 없으면 PASS)
+}
+
+function groupRules(room, me, mustSpeak) {
+  const others = groupMembers(room).filter(m => m.id !== me.id).map(m => `${m.name}(${m.status || "친구"})`).join(", ");
+  return `
+[단톡방 규칙]
+- 지금은 단톡방이야. 멤버: 사용자, ${others}, 그리고 너 "${me.name}".
+- 대화 기록에서 [이름]으로 시작하는 말은 그 멤버가 한 말이고, [사용자]는 너희와 대화하는 사람이 한 말이야.
+- 너는 "${me.name}"으로서 네 말만 해. 다른 멤버의 대사를 대신 쓰거나, 답 앞에 [이름]을 붙이지 마.
+- 말풍선 1~2개로 짧게. 앞사람과 같은 말은 반복하지 말고, 네 역할 관점에서 한 가지를 덧붙이거나 다른 멤버 말에 자연스럽게 반응해.
+- ${mustSpeak ? "이번엔 네가 먼저 대답해." : "이미 충분히 답이 나왔거나 덧붙일 말이 없으면, 다른 말 없이 PASS 라고만 써."}`.trim();
+}
+
+// 캐릭터 한 명에게 보낼 대화 기록 (최근 24개). 사진은 '이번에 보낸 사진'만 실제로 보내요.
+function historyFor(persona, log, room, imageNow) {
+  const recent = log.filter(m => !m.error).slice(-24);
+  let lastUser = -1;
+  recent.forEach((m, i) => { if (m.role === "user") lastUser = i; });
+  return recent.map((m, i) => {
+    if (m.role === "user") {
+      let text = room.isGroup ? `[사용자] ${m.content}` : m.content;
+      if (m.image && !(i === lastUser && imageNow)) text += " (사진을 보냈음)";
+      if (i === lastUser && imageNow) {
+        return { role: "user", content: [{ type: "text", text }, { type: "image_url", image_url: { url: imageNow } }] };
+      }
+      return { role: "user", content: text };
+    }
+    if (!room.isGroup || m.speaker === persona.id) return { role: "assistant", content: m.content };
+    const sp = findPersona(m.speaker);
+    return { role: "user", content: `[${sp ? sp.name : "다른 멤버"}] ${m.content}` };
+  });
+}
+
+/* =========================================================
+   H. 메시지 보내기
+   ========================================================= */
+const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+
+async function send(text) {
+  text = (text ?? inputEl.value).trim();
+  const img = pendingImage;
+  if ((!text && !img) || busy || !current) return;
+  if (!getKey()) { openKeySheet("대화를 시작하려면 API 키를 먼저 등록해 주세요."); return; }
+
+  busy = true;
+  const room = current, log = chatLog;   // 답을 기다리는 동안 방을 나가도 기록이 섞이지 않게
+  inputEl.value = ""; clearPendingImage(); autoGrow(); updateSendBtn();
+
+  const content = text || "이 화면 피드백 부탁드려요!";
+  const t = timeLabel();
+  const userMsg = { role: "user", content, time: t, ts: Date.now() };
+  if (img) userMsg.image = img.thumb;
+  log.push(userMsg);
+  saveChat(room.id, log);
+  const myGroup = renderMessage("user", content, t, { unread: true, image: img?.thumb });
+  const stillHere = () => current && current.id === room.id;
+
+  try {
+    const model = img ? visionModel() : currentModel();
+    if (!model) throw { type: "vision" };
+    const speakers = room.isGroup ? pickSpeakers(room, content) : [room];
+    if (!speakers.length) throw { type: "http", status: "멤버 없음", detail: "단톡방에 친구를 초대해 주세요." };
+    let anyone = false;
+
+    for (const sp of speakers) {
+      await sleep(anyone ? 350 : 450);
+      myGroup.querySelector(".read")?.remove();           // 읽음 표시 '1' 사라짐
+      if (stillHere()) showTyping(sp);
+
+      let system = buildSystemPrompt(sp);
+      if (room.isGroup) system += "\n\n" + groupRules(room, sp, !anyone);
+      const messages = [{ role: "system", content: system }, ...historyFor(sp, log, room, img?.full)];
+
+      let live = null, skipped = false, pending = "", raf = 0;
+      const clean = (s) => room.isGroup ? s.replace(/^\s*\[[^\]]{1,24}\]\s*/, "") : s;   // 단톡방에서 "[내 이름]" 붙이면 떼기
+      const full = await streamChat({
+        model, messages,
+        onDelta: (acc) => {
+          if (room.isGroup && anyone) {
+            const head = clean(acc).trimStart().toUpperCase();
+            if (head.length < 4 && "PASS".startsWith(head)) return;   // PASS인지 확인될 때까지 잠깐 기다리기
+            if (head.startsWith("PASS")) { skipped = true; return false; }
+          }
+          if (!stillHere()) return;
+          if (!live) { hideTyping(); live = createLiveMessage(sp); }
+          pending = clean(acc);
+          if (!raf) raf = requestAnimationFrame(() => { raf = 0; live.update(pending, false); });
+        },
+      });
+      if (raf) { cancelAnimationFrame(raf); raf = 0; }
+      hideTyping();
+
+      const reply = clean(full).trim();
+      if (skipped || (room.isGroup && /^PASS\b/i.test(reply)) || !reply) { live?.g.remove(); continue; }
+
+      const rt = timeLabel();
+      const msg = { role: "assistant", content: reply, time: rt, ts: Date.now() };
+      if (room.isGroup) msg.speaker = sp.id;
+      log.push(msg);
+      saveChat(room.id, log);
+      anyone = true;
+      if (stillHere()) { if (live) live.update(reply, true); else renderMessage("assistant", reply, rt, { speaker: sp }); }
+    }
+    if (!anyone && stillHere()) renderMessage("assistant", "앗, 잠깐 말이 끊겼어요. 다시 한 번 보내 주실래요?", timeLabel(), { speaker: speakers[0] });
+  } catch (err) {
+    hideTyping();
+    myGroup.querySelector(".read")?.remove();
+    if (stillHere()) renderMessage("assistant", errorText(err), timeLabel(), { error: true, speaker: room.isGroup ? (groupMembers(room)[0] || LEFT_MEMBER) : room });
+    if (err.type === "nokey" || err.status === 401) openKeySheet();
+  } finally {
+    busy = false; updateSendBtn();
+  }
+}
+
+function updateSendBtn() {
+  const on = (inputEl.value.trim().length > 0 || !!pendingImage) && !busy;
+  sendBtn.disabled = !on; sendBtn.classList.toggle("active", on);
+}
+function autoGrow() {
+  inputEl.style.height = "auto";
+  if (!inputEl.value) { inputEl.style.height = ""; return; }   // 비어 있으면 기본 한 줄 높이로
+  inputEl.style.height = Math.min(inputEl.scrollHeight, 110) + "px";
+}
+inputEl.addEventListener("input", () => { autoGrow(); updateSendBtn(); });
+inputEl.addEventListener("keydown", (e) => {
+  // Enter = 전송, Shift+Enter = 줄바꿈 (한글 조합 중에는 무시)
+  if (e.key === "Enter" && !e.shiftKey && !e.isComposing) { e.preventDefault(); send(); }
+});
+sendBtn.addEventListener("click", () => send());
+
+/* =========================================================
+   H-2. 사진 첨부 (Figma 캡처 피드백)
+   + 버튼으로 고르거나, 캡처를 복사해서 입력창에 붙여넣기(Ctrl/Cmd+V)
+   ========================================================= */
+let pendingImage = null;   // { full: 보낼 큰 사진, thumb: 화면·기록용 작은 사진 }
+
+function loadImageFile(file) {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => { URL.revokeObjectURL(url); resolve(img); };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("이미지를 읽지 못했어요")); };
+    img.src = url;
+  });
+}
+// 사진 크기 줄이기 (긴 쪽을 max 픽셀로, JPEG로 압축)
+function shrink(img, max, quality) {
+  const scale = Math.min(1, max / Math.max(img.naturalWidth, img.naturalHeight));
+  const c = document.createElement("canvas");
+  c.width = Math.round(img.naturalWidth * scale); c.height = Math.round(img.naturalHeight * scale);
+  const ctx = c.getContext("2d");
+  ctx.fillStyle = "#FFFFFF"; ctx.fillRect(0, 0, c.width, c.height);   // 투명 배경 PNG도 하얗게
+  ctx.drawImage(img, 0, 0, c.width, c.height);
+  return c.toDataURL("image/jpeg", quality);
+}
+async function attachFile(file) {
+  if (!file || !file.type.startsWith("image/")) return;
+  try {
+    const img = await loadImageFile(file);
+    pendingImage = { full: shrink(img, 1600, 0.85), thumb: shrink(img, 520, 0.72) };
+    $("attachImg").src = pendingImage.thumb;
+    $("attachPreview").hidden = false;
+    inputEl.placeholder = "어떤 부분을 봐줄지 적어도 돼요";
+    updateSendBtn();
+    inputEl.focus();
+  } catch { alertBubble("사진을 불러오지 못했어요. 다른 파일로 해볼까요?"); }
+}
+function clearPendingImage() {
+  pendingImage = null;
+  $("attachPreview").hidden = true;
+  $("attachImg").removeAttribute("src");
+  $("fileInput").value = "";
+  inputEl.placeholder = "메시지 입력";
+  autoGrow();
+}
+function alertBubble(text) { if (current) renderMessage("assistant", text, timeLabel(), { error: true, speaker: current.isGroup ? (groupMembers(current)[0] || LEFT_MEMBER) : current }); }
+
+$("attachBtn").onclick = () => $("fileInput").click();
+$("fileInput").onchange = (e) => attachFile(e.target.files[0]);
+$("attachRemove").onclick = () => { clearPendingImage(); updateSendBtn(); };
+inputEl.addEventListener("paste", (e) => {
+  const item = [...(e.clipboardData?.items || [])].find(i => i.type.startsWith("image/"));
+  if (item) { e.preventDefault(); attachFile(item.getAsFile()); }
+});
+
+// 사진 크게 보기
+function openLightbox(src) { $("lightboxImg").src = src; $("lightbox").classList.add("show"); }
+function closeLightbox() { $("lightbox").classList.remove("show"); }
+$("lightbox").onclick = closeLightbox;
+
+/* =========================================================
+   I. 시트 열고 닫기
+   ========================================================= */
+const dim = $("dim");
+function showSheet(id) {
+  document.querySelectorAll(".sheet.show").forEach(s => s.classList.remove("show"));
+  $(id).classList.add("show"); dim.classList.add("show");
+}
+function closeSheets() {
+  document.querySelectorAll(".sheet.show").forEach(s => s.classList.remove("show"));
+  dim.classList.remove("show"); $("keyInput").type = "password";
+}
+dim.onclick = closeSheets;
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeSheets(); });
+
+/* ---------- API 키 시트 ---------- */
+const keyInput = $("keyInput"), keyMsg = $("keyMsg");
+function openKeySheet(message) {
+  const k = getKey();
+  keyInput.value = "";
+  keyInput.placeholder = k ? `저장됨: ${maskKey(k)} (바꾸려면 새로 입력)` : "gsk_로 시작하는 키";
+  $("rememberKey").checked = !!safeGet(localStorage, KEY_NAME);
+  keyMsg.className = message ? "msg bad" : "msg";
+  keyMsg.textContent = message || "";
+  showSheet("keySheet");
+  setTimeout(() => keyInput.focus(), 250);
+}
+$("openKeyFromList").onclick = () => openKeySheet();
+$("toggleKey").onclick = () => { keyInput.type = keyInput.type === "password" ? "text" : "password"; };
+
+$("saveKey").onclick = async () => {
+  const remember = $("rememberKey").checked;
+  const oldKey = getKey();
+  const key = keyInput.value.trim() || oldKey;
+  if (!key) { keyMsg.className = "msg bad"; keyMsg.textContent = "API 키를 입력해 주세요."; return; }
+  if (!/^gsk_[A-Za-z0-9]{20,}$/.test(key)) { keyMsg.className = "msg bad"; keyMsg.textContent = "Groq 키는 보통 gsk_로 시작해요. 다시 확인해 주세요."; return; }
+
+  keyMsg.className = "msg"; keyMsg.textContent = "연결 확인 중…";
+  saveKeyToStorage(key, remember);
+  try {
+    const model = await loadModels();
+    keyMsg.className = "msg ok"; keyMsg.textContent = `연결 성공! (${maskKey(key)}) 모델: ${model}`;
+    keyInput.value = ""; keyInput.placeholder = `저장됨: ${maskKey(key)} (바꾸려면 새로 입력)`;
+    refreshAfterKeyChange();
+    setTimeout(closeSheets, 900);
+  } catch (err) {
+    deleteKey();
+    if (oldKey && oldKey !== key) saveKeyToStorage(oldKey, remember);
+    keyMsg.className = "msg bad"; keyMsg.textContent = errorText(err);
+    refreshAfterKeyChange();
+  }
+};
+modelSelect.onchange = () => safeSet(localStorage, MODEL_NAME, modelSelect.value);
+$("deleteKey").onclick = () => {
+  deleteKey(); keyInput.value = ""; keyInput.placeholder = "gsk_로 시작하는 키";
+  modelSelect.innerHTML = `<option value="">키를 저장하면 목록을 불러와요</option>`;
+  keyMsg.className = "msg ok"; keyMsg.textContent = "이 브라우저에서 API 키를 삭제했어요.";
+  refreshAfterKeyChange();
+};
+function refreshAfterKeyChange() { updateStatus(); if (!current) renderList(); }
+
+/* ---------- 채팅방 메뉴 시트 ---------- */
+$("openRoomMenu").onclick = () => {
+  $("menuEdit").textContent = current.isGroup ? "단톡방 멤버 보기·수정" : (current.builtIn ? "캐릭터 설정 보기" : "캐릭터 설정 보기·수정");
+  $("menuLeave").style.display = current.isGroup ? "" : "none";
+  showSheet("roomSheet");
+};
+$("menuKey").onclick = () => openKeySheet();
+$("menuEdit").onclick = () => current.isGroup ? openGroupSheet(current) : openPersonaSheet(current);
+$("menuClear").onclick = () => {
+  chatLog = []; saveChat(current.id, chatLog); renderAll(); closeSheets();
+};
+$("menuLeave").onclick = () => leaveGroup(current.id);
+
+/* ---------- 단톡방 만들기·수정 시트 ---------- */
+let editingGroupId = null;
+function openGroupSheet(g) {
+  editingGroupId = g ? g.id : null;
+  $("groupTitle").textContent = g ? "단톡방 멤버 수정" : "단톡방 만들기";
+  $("saveGroup").textContent = g ? "저장하기" : "단톡방 만들기";
+  $("deleteGroup").style.display = g ? "" : "none";
+  $("gName").value = g?.name || "";
+  $("gMsg").textContent = ""; $("gMsg").className = "msg";
+  const box = $("gMembers"); box.innerHTML = "";
+  const chosen = new Set(g ? g.memberIds : ["hankyung", "instructor", "buddy"]);   // 처음엔 추천 멤버 미리 체크
+  allPersonas().forEach(p => {
+    const row = document.createElement("label"); row.className = "member";
+    const cb = document.createElement("input"); cb.type = "checkbox"; cb.value = p.id; cb.checked = chosen.has(p.id);
+    const info = document.createElement("span"); info.className = "m-info";
+    const nm = document.createElement("b"); nm.textContent = p.name;
+    const st = document.createElement("small"); st.textContent = p.status || "";
+    info.append(nm, st);
+    row.append(cb, makeAvatar(p, "sm"), info);
+    box.appendChild(row);
+  });
+  showSheet("groupSheet");
+}
+$("saveGroup").onclick = () => {
+  const ids = [...$("gMembers").querySelectorAll("input:checked")].map(c => c.value);
+  if (ids.length < 2) { $("gMsg").className = "msg bad"; $("gMsg").textContent = "친구를 2명 이상 골라 주세요."; return; }
+  const name = $("gName").value.trim();
+  if (editingGroupId) {
+    groups = groups.map(g => g.id === editingGroupId ? { ...g, name, memberIds: ids } : g);
+    saveGroups(); closeSheets();
+    if (current && current.id === editingGroupId) openChat(editingGroupId); else renderList();
+  } else {
+    const g = { id: "group_" + Date.now().toString(36), name, memberIds: ids, isGroup: true, createdAt: Date.now() };
+    groups.push(g); saveGroups(); closeSheets();
+    listTab = "chats"; safeSet(localStorage, "hk_tab", listTab);
+    renderList(); openChat(g.id);
+  }
+};
+function leaveGroup(id) {
+  groups = groups.filter(g => g.id !== id);
+  safeDel(localStorage, chatKey(id)); safeDel(localStorage, bgKey(id));
+  saveGroups(); closeSheets();
+  if (current && current.id === id) closeChat(); else renderList();
+}
+$("deleteGroup").onclick = () => editingGroupId && leaveGroup(editingGroupId);
+
+/* ---------- 캐릭터 추가·수정 시트 ---------- */
+const COLORS = ["#8B6CFF", "#B07CFF", "#6E56CF", "#5E6AD2", "#D27CF0", "#6FA8FF", "#2C2A38"];
+let editingId = null, pickedColor = COLORS[4];
+const pf = { emoji: $("pEmoji"), name: $("pName"), status: $("pStatus"), prompt: $("pPrompt"), greeting: $("pGreeting"), chips: $("pChips"), useInfo: $("pUseInfo"), useFood: $("pUseFood") };
+
+function drawColors() {
+  const box = $("pColors"); box.innerHTML = "";
+  COLORS.forEach(c => {
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "color" + (c === pickedColor ? " on" : "");
+    b.style.background = c; b.setAttribute("aria-label", "프로필 색 " + c);
+    b.onclick = () => { pickedColor = c; drawColors(); drawPreview(); };
+    box.appendChild(b);
+  });
+}
+function drawPreview() {
+  const prev = $("pPreview");
+  const emoji = pf.emoji.value.trim() || (pf.name.value.trim()[0] || "?");
+  prev.replaceWith(Object.assign(makeAvatar({ emoji, color: pickedColor }, "lg"), { id: "pPreview" }));
+}
+pf.emoji.oninput = drawPreview; pf.name.oninput = drawPreview;
+
+function openPersonaSheet(p, draft) {
+  draftExtra = draft ? draft.extra : null;     // 검색으로 찾은 캐릭터면 추가 정보 보관
+  if (draft) p = null;
+  const src = p || draft;                       // 화면에 채울 내용
+  const readOnly = !!(p && p.builtIn);
+  editingId = p && !p.builtIn ? p.id : null;
+  $("personaTitle").textContent = !p ? "새 캐릭터 추가" : (readOnly ? "캐릭터 설정" : "캐릭터 수정");
+  pf.emoji.value = src?.emoji || "";
+  pf.name.value = src?.name || "";
+  pf.status.value = src?.status || "";
+  pf.prompt.value = src?.prompt || "";
+  pf.greeting.value = src?.greeting || "";
+  pf.chips.value = (src?.chips || []).join(", ");
+  pf.useInfo.checked = src ? !!src.useInfo : true;
+  pf.useFood.checked = !!src?.useFood;
+  pickedColor = src?.color || COLORS[4];
+  Object.values(pf).forEach(el => el.disabled = readOnly);
+  $("fillExample").style.display = src ? "none" : "";
+  $("savePersona").style.display = readOnly ? "none" : "";
+  $("savePersona").textContent = editingId ? "저장하기" : "추가하기";
+  $("deletePersona").style.display = editingId ? "" : "none";
+  $("pMsg").textContent = readOnly ? "기본 캐릭터는 index.html 안의 DEFAULT_PERSONAS · SHINCHAN_PERSONAS에서 바꿀 수 있어요."
+    : draft ? "검색으로 만든 내용이에요. 고칠 곳이 있으면 고치고 추가해 주세요." : "";
+  $("pMsg").className = "msg";
+  drawColors(); drawPreview();
+  showSheet("personaSheet");
+}
+$("addFriendBtn").onclick = () => openPersonaSheet();
+
+$("fillExample").onclick = () => {
+  pf.emoji.value = "🔍"; pickedColor = "#5E6AD2";
+  pf.name.value = "이서연 선배";
+  pf.status.value = "5기 수료 · 핀테크 스타트업 UX 리서처 (가상 인물)";
+  pf.prompt.value = "너는 \"이서연\"이야. 이 부트캠프를 먼저 수료하고 핀테크 스타트업에서 UX 리서처로 일하는 20대 후반 선배야. (실습용 가상 인물)\n차분하고 다정한 해요체를 써. 사용자 인터뷰 질문 만들기, 설문 설계, 리서치 결과 정리를 도와줘.\n후배가 질문하면 실무에서 겪은 예시를 하나 들어서 설명해.";
+  pf.greeting.value = "안녕하세요, 서연 선배예요 :) 리서치나 수료 후 취업 이야기 궁금하면 편하게 물어봐요!";
+  pf.chips.value = "인터뷰 질문 같이 만들어 주세요, 설문은 몇 명한테 해야 해요?, 수료 후에 어떻게 취업했어요?";
+  pf.useInfo.checked = true;
+  pf.useFood.checked = false;
+  drawColors(); drawPreview();
+};
+
+$("savePersona").onclick = () => {
+  const name = pf.name.value.trim(), prompt = pf.prompt.value.trim();
+  if (!name || !prompt) { $("pMsg").className = "msg bad"; $("pMsg").textContent = "이름과 캐릭터 설정은 꼭 적어 주세요."; return; }
+  const data = {
+    name, prompt,
+    emoji: pf.emoji.value.trim() || name[0],
+    color: pickedColor,
+    status: pf.status.value.trim(),
+    greeting: pf.greeting.value.trim(),
+    chips: pf.chips.value.split(",").map(s => s.trim()).filter(Boolean).slice(0, 6),
+    useInfo: pf.useInfo.checked,
+    useFood: pf.useFood.checked,
+    builtIn: false,
+  };
+  if (editingId) {
+    customPersonas = customPersonas.map(p => p.id === editingId ? { ...p, ...data } : p);
+  } else {
+    Object.assign(data, draftExtra || {});     // 검색으로 찾은 캐릭터면 세계관·부르는 이름 등 함께 저장
+    data.builtIn = false;
+    data.id = "custom_" + Date.now().toString(36);
+    customPersonas.push(data);
+    draftExtra = null;
+  }
+  saveCustom();
+  closeSheets();
+  if (current && editingId === current.id) openChat(current.id);   // 열린 방이면 바로 반영
+  else if (!editingId) { renderList(); openChat(data.id); }        // 새 캐릭터면 바로 대화 시작
+  else renderList();
+};
+
+$("deletePersona").onclick = () => {
+  if (!editingId) return;
+  customPersonas = customPersonas.filter(p => p.id !== editingId);
+  safeDel(localStorage, chatKey(editingId));
+  groups = groups.map(g => ({ ...g, memberIds: g.memberIds.filter(id => id !== editingId) }));   // 단톡방에서도 빼기
+  saveGroups();
+  saveCustom();
+  closeSheets();
+  if (current && current.id === editingId) closeChat(); else renderList();
+};
+
+
+
+/* =========================================================
+   M. 애니 캐릭터 검색해서 추가하기
+   ① 위키백과 공개 API로 자료 찾기 (키 필요 없음)
+   ② Groq에 웹 검색 모델(compound)이 있으면 웹에서도 찾기
+   ③ 찾은 자료로 AI가 페르소나(성격·말투·인사·빠른 질문)를 JSON으로 정리
+   ④ 미리보기 → 바로 추가 또는 수정해서 추가
+   ========================================================= */
+let draftExtra = null;   // 검색으로 만든 캐릭터의 추가 정보 (fan, aliases, world, sources)
+let foundPersona = null; // 방금 찾은 캐릭터 (미리보기용)
+
+async function wikiSearch(query, lang = "ko") {
+  const u = `https://${lang}.wikipedia.org/w/api.php?action=query&list=search&format=json&origin=*&srlimit=6&srsearch=${encodeURIComponent(query)}`;
+  const j = await (await fetch(u)).json();
+  return (j.query?.search || []).map(s => s.title);
+}
+async function wikiPage(title, lang = "ko") {
+  const u = `https://${lang}.wikipedia.org/w/api.php?action=query&prop=extracts&explaintext=1&redirects=1&format=json&origin=*&titles=${encodeURIComponent(title)}`;
+  const j = await (await fetch(u)).json();
+  const page = Object.values(j.query?.pages || {})[0] || {};
+  const t = page.title || title;
+  return { title: t, text: page.extract || "", url: `https://${lang}.wikipedia.org/wiki/${encodeURIComponent(t.replace(/ /g, "_"))}` };
+}
+// 긴 문서에서 캐릭터 이름이 나오는 부분만 잘라 오기
+function textAround(text, name, max = 3500) {
+  if (!text) return "";
+  const hits = []; let i = -1;
+  while ((i = text.indexOf(name, i + 1)) >= 0 && hits.length < 8) hits.push(i);
+  if (!hits.length) return text.slice(0, max);
+  let out = "", lastEnd = -1;
+  for (const k of hits) {
+    const s = Math.max(0, k - 250, lastEnd), e = k + 900;
+    if (e <= lastEnd) continue;
+    out += text.slice(s, e) + "\n…\n"; lastEnd = e;
+    if (out.length > max) break;
+  }
+  return out.slice(0, max);
+}
+
+async function researchCharacter(name, work, step) {
+  const sources = []; let notes = "";
+  step("📚 위키백과에서 자료 찾는 중…");
+  try {
+    const score = (t) => (t.includes(name) ? 2 : 0) + (work && t.includes(work) ? 1 : 0) + (/등장인물/.test(t) ? 1 : 0);
+    const titles = new Set([...(await wikiSearch(`${work} ${name}`.trim())), ...(work ? await wikiSearch(`${work} 등장인물`) : [])]);
+    const picks = [...titles].sort((a, b) => score(b) - score(a)).slice(0, 2);
+    for (const t of picks) {
+      const pg = await wikiPage(t);
+      if (pg.text && pg.text.includes(name) && !sources.some(x => x.url === pg.url)) {
+        notes += `\n[위키백과 「${pg.title}」]\n` + textAround(pg.text, name);
+        sources.push({ title: `위키백과 「${pg.title}」`, url: pg.url });
+      }
+    }
+  } catch { /* 위키백과 연결이 안 되면 다음 단계로 */ }
+
+  const webModel = availableModels.find(id => /compound/i.test(id));
+  if (webModel) {
+    step("🌐 웹에서 더 찾아보는 중…");
+    try {
+      const d = await groqFetch("/chat/completions", { method: "POST", body: JSON.stringify({
+        model: webModel,
+        messages: [{ role: "user", content: `애니메이션 「${work || "작품 모름"}」에 나오는 캐릭터 "${name}"를 웹에서 찾아서 한국어로 정리해 줘. 한국판 이름, 나이, 가족·친구 관계, 성격, 좋아하는 것·싫어하는 것, 말투와 말버릇, 대표적인 설정. 확인된 사실만 짧은 목록으로.` }],
+      }) });
+      const txt = d.choices?.[0]?.message?.content || "";
+      if (txt) { notes += "\n[웹 검색 요약]\n" + txt.slice(0, 4000); sources.push({ title: "Groq 웹 검색", url: "" }); }
+    } catch { /* 웹 검색 모델이 실패해도 계속 */ }
+  }
+  return { notes: notes.trim(), sources };
+}
+
+function parseLooseJSON(text) {
+  try { return JSON.parse(text); } catch {}
+  const m = text.match(/\{[\s\S]*\}/);
+  if (m) { try { return JSON.parse(m[0]); } catch {} }
+  return null;
+}
+
+async function generatePersona(name, work, research, step) {
+  step("✍️ 성격과 말투 정리하는 중…");
+  const system = `너는 캐릭터 롤플레이 챗봇의 페르소나 설계자야. 조사 자료를 바탕으로 애니메이션 캐릭터 페르소나를 JSON 하나로만 답해.
+자료에 없는 내용은 네가 확실히 아는 것만 쓰고, 모르면 지어내지 말고 두루뭉술하게 써.
+형식:
+{"found": true 또는 false,
+ "name": "한국에서 부르는 캐릭터 이름(짧게)",
+ "work": "작품의 한국어 제목",
+ "aliases": ["대화에서 이 캐릭터를 부를 때 쓰는 이름들"],
+ "status": "한 줄 소개, 25자 이내",
+ "emoji": "캐릭터를 상징하는 이모지 1개",
+ "color": "#RRGGBB (캐릭터 이미지 색)",
+ "world": "작품 세계관과 주요 인물 관계 2~4줄",
+ "prompt": "너는 \\"이름\\"이야. 로 시작하는 캐릭터 설정 5~8줄. 나이와 관계 / 성격 / 좋아하는 것·싫어하는 것 / 말투와 말버릇(예시 표현 몇 개) 순서로",
+ "greeting": "그 캐릭터다운 첫 인사. 말풍선 1~2개, 빈 줄로 구분",
+ "chips": ["사용자가 이 캐릭터에게 던질 만한 빠른 질문 4개"]}
+규칙: 원작 대사를 길게 그대로 옮기지 마. 반드시 한국어. 그 작품의 그 캐릭터가 맞는지 확신이 없으면 found를 false로.`;
+  const user = `작품: ${work || "(사용자가 안 적음)"}\n캐릭터: ${name}\n\n[조사 자료]\n${research.notes || "(자료를 찾지 못했어. 네가 확실히 아는 정보만 써.)"}`;
+  const body = { model: currentModel(), messages: [{ role: "system", content: system }, { role: "user", content: user }], temperature: 0.4, max_completion_tokens: 2500 };
+  let d;
+  try { d = await groqFetch("/chat/completions", { method: "POST", body: JSON.stringify({ ...body, response_format: { type: "json_object" } }) }); }
+  catch (e) { if (e.status === 400) d = await groqFetch("/chat/completions", { method: "POST", body: JSON.stringify(body) }); else throw e; }
+  return parseLooseJSON(d.choices?.[0]?.message?.content || "");
+}
+
+function openFindSheet() {
+  $("fName").value = ""; $("fWork").value = "";
+  $("fMsg").textContent = ""; $("fMsg").className = "msg";
+  $("fResult").hidden = true; $("fActions").hidden = true;
+  $("findBtn").disabled = false; $("findBtn").textContent = "찾아보기"; $("findBtn").className = "btn primary";
+  foundPersona = null;
+  showSheet("findSheet");
+  setTimeout(() => $("fName").focus(), 250);
+}
+
+$("findBtn").onclick = async () => {
+  const name = $("fName").value.trim(), work = $("fWork").value.trim();
+  const msg = $("fMsg");
+  if (!name) { msg.className = "msg bad"; msg.textContent = "캐릭터 이름을 적어 주세요."; return; }
+  if (!getKey()) { openKeySheet("캐릭터를 만들려면 API 키가 필요해요."); return; }
+  const step = (t) => { msg.className = "msg"; msg.textContent = t; };
+  $("findBtn").disabled = true; $("fResult").hidden = true; $("fActions").hidden = true;
+  try {
+    if (!availableModels.length) await loadModels().catch(() => {});
+    const research = await researchCharacter(name, work, step);
+    const p = await generatePersona(name, work, research, step);
+    if (!p || !p.prompt) throw { type: "http", status: "정리 실패", detail: "AI가 결과를 잘 만들지 못했어요. 다시 눌러 볼까요?" };
+    if (p.found === false) {
+      msg.className = "msg bad";
+      msg.textContent = "그 캐릭터를 확실히 찾지 못했어요. 작품 이름을 같이 적거나 한국판 이름으로 다시 찾아볼까요?";
+      return;
+    }
+    foundPersona = {
+      name: (p.name || name).slice(0, 20),
+      status: (p.status || p.work || "").slice(0, 40),
+      emoji: [...(p.emoji || "✨")].slice(0, 2).join(""),
+      color: /^#[0-9a-f]{6}$/i.test(p.color || "") ? p.color : COLORS[0],
+      prompt: p.prompt,
+      greeting: p.greeting || "",
+      chips: Array.isArray(p.chips) ? p.chips.slice(0, 5) : [],
+      extra: {
+        fan: true,
+        aliases: Array.isArray(p.aliases) ? p.aliases.slice(0, 6) : [name],
+        world: p.world ? `[세계관 — ${p.work || work || "원작"}]\n${p.world}` : "",
+        work: p.work || work,
+        sources: research.sources,
+      },
+    };
+    showFound(foundPersona);
+    step(research.notes ? "찾았어요! 확인하고 추가해 주세요." : "자료를 못 찾아서 AI가 아는 정보로만 만들었어요. 내용을 꼭 확인해 주세요.");
+  } catch (err) {
+    msg.className = "msg bad"; msg.textContent = errorText(err);
+  } finally {
+    $("findBtn").disabled = false; $("findBtn").textContent = "다시 찾기";
+  }
+};
+
+function showFound(fp) {
+  const box = $("fResult"); box.innerHTML = "";
+  const head = document.createElement("div"); head.className = "found-head";
+  const info = document.createElement("div");
+  const nm = document.createElement("b"); nm.textContent = fp.name;
+  const st = document.createElement("small"); st.textContent = fp.status;
+  info.append(nm, st);
+  head.append(makeAvatar(fp, "lg"), info);
+  const pr = document.createElement("p"); pr.className = "found-prompt"; pr.textContent = fp.prompt;
+  box.append(head, pr);
+  if (fp.extra.sources?.length) {
+    const src = document.createElement("p"); src.className = "found-src"; src.append("출처: ");
+    fp.extra.sources.forEach((s, i) => {
+      if (i) src.append(" · ");
+      if (s.url) { const a = document.createElement("a"); a.href = s.url; a.target = "_blank"; a.rel = "noopener noreferrer"; a.textContent = s.title; src.append(a); }
+      else src.append(s.title);
+    });
+    box.append(src);
+  }
+  box.hidden = false; $("fActions").hidden = false;
+  $("findBtn").className = "btn ghost";
+}
+
+function addFoundPersona() {
+  const fp = foundPersona; if (!fp) return;
+  const data = { ...fp.extra, id: "custom_" + Date.now().toString(36), name: fp.name, status: fp.status, emoji: fp.emoji, color: fp.color,
+    prompt: fp.prompt, greeting: fp.greeting, chips: fp.chips, useInfo: false, useFood: false, builtIn: false };
+  customPersonas.push(data); saveCustom(); closeSheets();
+  listTab = "friends"; renderList(); openChat(data.id);
+}
+$("fAdd").onclick = addFoundPersona;
+$("fEdit").onclick = () => {
+  const fp = foundPersona; if (!fp) return;
+  openPersonaSheet(null, { ...fp });   // 내용을 채운 채로 캐릭터 추가 창 열기
+};
+[$("fName"), $("fWork")].forEach(el => el.addEventListener("keydown", e => { if (e.key === "Enter" && !e.isComposing) $("findBtn").click(); }));
+
+
+/* =========================================================
+   N. 채팅방 배경 (캐릭터 대표 색 + 이모지 무늬 / 직접 고른 사진)
+   ========================================================= */
+function hexToRgb(hex) {
+  const m = /^#?([0-9a-f]{6})$/i.exec(hex || ""); if (!m) return "139,108,255";
+  const n = parseInt(m[1], 16); return `${(n >> 16) & 255},${(n >> 8) & 255},${n & 255}`;
+}
+// 이모지를 흩뿌린 무늬 타일(SVG)을 배경으로
+function emojiPattern(emojis) {
+  if (!emojis.length) return "none";
+  const spots = [[18, 34, -12], [86, 22, 10], [52, 78, 6], [12, 118, 14], [96, 104, -8], [60, 148, -4]];
+  const texts = spots.map(([x, y, r], i) =>
+    `<text x='${x}' y='${y}' font-size='20' transform='rotate(${r} ${x} ${y})'>${emojis[i % emojis.length]}</text>`).join("");
+  const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='140' height='175'><g opacity='0.05' style='filter:saturate(.6)'>${texts}</g></svg>`;
+  return `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
+}
+function bgKey(id) { return "hk_bg_" + id; }
+function applyRoomBg(room) {
+  const el = $("roomBg");
+  el.className = "room-bg"; el.removeAttribute("style");
+  if (!room) return;
+  const photo = safeGet(localStorage, bgKey(room.id));
+  $("menuBgReset").style.display = photo ? "" : "none";
+  if (photo) { el.classList.add("photo"); el.style.setProperty("--room-photo", `url("${photo}")`); return; }
+  const people = room.isGroup ? groupMembers(room) : [room];
+  const colors = people.map(p => p.color).filter(Boolean);
+  el.classList.add("themed");
+  el.style.setProperty("--room-rgb", hexToRgb(colors[0]));
+  el.style.setProperty("--room-rgb2", hexToRgb(colors[1] || colors[0]));
+  el.style.setProperty("--room-pattern", emojiPattern(people.map(p => p.emoji).filter(Boolean)));
+}
+$("menuBg").onclick = () => $("bgInput").click();
+$("bgInput").onchange = async (e) => {
+  const file = e.target.files[0]; e.target.value = "";
+  if (!file || !current) return;
+  try {
+    const img = await loadImageFile(file);
+    let data = shrink(img, 1280, 0.72);
+    safeSet(localStorage, bgKey(current.id), data);
+    if (safeGet(localStorage, bgKey(current.id)) !== data) {   // 저장 공간이 모자라면 더 작게
+      data = shrink(img, 800, 0.6); safeSet(localStorage, bgKey(current.id), data);
+    }
+    const saved = safeGet(localStorage, bgKey(current.id)) === data;
+    closeSheets();
+    if (saved) applyRoomBg(current);
+    else { const el = $("roomBg"); el.className = "room-bg photo"; el.style.setProperty("--room-photo", `url("${data}")`); alertBubble("사진이 커서 저장은 못 했어요. 이번에만 배경으로 보여요."); }
+  } catch { alertBubble("사진을 불러오지 못했어요. 다른 파일로 해볼까요?"); }
+};
+$("menuBgReset").onclick = () => { safeDel(localStorage, bgKey(current.id)); applyRoomBg(current); closeSheets(); };
+
+/* =========================================================
+   K. 다크 · 라이트 모드 전환 (초승달 ↔ 해)
+   ========================================================= */
+const themeBtn = $("themeBtn");
+function applyTheme(mode) {
+  if (mode === "light") document.documentElement.dataset.theme = "light";
+  else delete document.documentElement.dataset.theme;
+  document.querySelector('meta[name="theme-color"]').content = mode === "light" ? "#F8F6FD" : "#0B0B10";
+  themeBtn.setAttribute("aria-label", mode === "light" ? "다크 모드로 바꾸기" : "라이트 모드로 바꾸기");
+  safeSet(localStorage, "hk_theme", mode);
+}
+themeBtn.onclick = () => {
+  const next = document.documentElement.dataset.theme === "light" ? "dark" : "light";
+  themeBtn.classList.add("spin");                       // 아이콘이 살짝 돌면서 사라졌다가
+  setTimeout(() => { applyTheme(next); themeBtn.classList.remove("spin"); }, 220);  // 새 아이콘으로 등장
+};
+applyTheme(document.documentElement.dataset.theme === "light" ? "light" : "dark");
+
+
+/* =========================================================
+   L. 포인트 색상 10가지 (다크·라이트 모두 어울리게 색을 짝지어 둠)
+   d1·d2 = 다크 모드 포인트 글자색, l1·l2 = 라이트 모드 포인트 글자색,
+   rgb = 은은한 배경·테두리용, rgb2 = 그림자·빛 번짐용, g = 그라데이션 3색
+   ========================================================= */
+const ACCENTS = [
+  { id: "lavender", name: "라벤더",   d1: "#E4D9FF", d2: "#B9A2FF", l1: "#5B3FD6", l2: "#7C5CFF", rgb: "185,162,255", rgb2: "146,119,255", g: ["#EDE4FF", "#C3AEFF", "#9277FF"] },
+  { id: "blue",     name: "아이스블루", d1: "#DCE9FF", d2: "#97BCFF", l1: "#2C5BC9", l2: "#4A7BFF", rgb: "151,188,255", rgb2: "90,140,255",  g: ["#E7F0FF", "#AECBFF", "#5B8CFF"] },
+  { id: "sky",      name: "스카이",   d1: "#D6F4FF", d2: "#86D9FF", l1: "#0B6A96", l2: "#1890CC", rgb: "134,217,255", rgb2: "40,175,235",  g: ["#E4F9FF", "#A6E4FF", "#2AB0EE"] },
+  { id: "mint",     name: "민트",     d1: "#D4F7EC", d2: "#86E2C7", l1: "#0F7A64", l2: "#18A084", rgb: "134,226,199", rgb2: "46,190,155",  g: ["#E4FBF4", "#A4ECD6", "#2EBE9B"] },
+  { id: "lime",     name: "라임",     d1: "#EAF9CC", d2: "#BDEB72", l1: "#4A760D", l2: "#629A16", rgb: "189,235,114", rgb2: "130,195,50",  g: ["#F2FCE0", "#CDF08F", "#82C332"] },
+  { id: "lemon",    name: "레몬",     d1: "#FFF4C6", d2: "#FFDD6B", l1: "#8E6200", l2: "#B88000", rgb: "255,221,107", rgb2: "240,185,40",  g: ["#FFF9DD", "#FFE585", "#F0B928"] },
+  { id: "peach",    name: "피치",     d1: "#FFE3D6", d2: "#FFB394", l1: "#B8441C", l2: "#E0612F", rgb: "255,179,148", rgb2: "250,125,85",  g: ["#FFEEE6", "#FFC4AA", "#FA7D55"] },
+  { id: "pink",     name: "핑크",     d1: "#FFDEF0", d2: "#FF9FCD", l1: "#B8236F", l2: "#E23F94", rgb: "255,159,205", rgb2: "245,90,165",  g: ["#FFE9F4", "#FFB6D8", "#F55AA5"] },
+  { id: "rose",     name: "로즈골드", d1: "#F7DED6", d2: "#E7AD9E", l1: "#93463B", l2: "#B35D4C", rgb: "231,173,158", rgb2: "200,118,105", g: ["#FBEAE4", "#EDC0B3", "#C87669"] },
+  { id: "silver",   name: "실버",     d1: "#EEEEF3", d2: "#C5C5CF", l1: "#43434F", l2: "#5E5E70", rgb: "197,197,207", rgb2: "140,140,160", g: ["#FFFFFF", "#D8D8E0", "#8C8CA0"] },
+];
+function accentVars(a) {
+  return {
+    "--acc-d1": a.d1, "--acc-d2": a.d2, "--acc-l1": a.l1, "--acc-l2": a.l2,
+    "--acc-rgb": a.rgb, "--acc2-rgb": a.rgb2,
+    "--g1": a.g[0], "--g2": a.g[1], "--g3": a.g[2],
+  };
+}
+function applyAccent(id) {
+  const a = ACCENTS.find(x => x.id === id) || ACCENTS[0];
+  const vars = accentVars(a);
+  Object.entries(vars).forEach(([k, v]) => document.documentElement.style.setProperty(k, v));
+  safeSet(localStorage, "hk_accent", a.id);
+  safeSet(localStorage, "hk_accent_vars", JSON.stringify(vars));   // 다음에 열 때 깜빡임 없이 바로 적용
+  document.querySelectorAll(".swatch").forEach(s => s.classList.toggle("on", s.dataset.id === a.id));
+}
+function drawSwatches() {
+  const box = $("swatches"); box.innerHTML = "";
+  const now = safeGet(localStorage, "hk_accent") || "lavender";
+  ACCENTS.forEach(a => {
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "swatch" + (a.id === now ? " on" : ""); b.dataset.id = a.id;
+    b.setAttribute("aria-label", a.name + " 색상");
+    const dot = document.createElement("span"); dot.className = "dot";
+    dot.style.background = `linear-gradient(135deg, ${a.g[0]} 0%, ${a.g[1]} 45%, ${a.g[2]} 100%)`;
+    const label = document.createElement("span"); label.className = "label"; label.textContent = a.name;
+    b.append(dot, label);
+    b.onclick = () => applyAccent(a.id);
+    box.appendChild(b);
+  });
+}
+$("paletteBtn").onclick = () => { drawSwatches(); showSheet("themeSheet"); };
+applyAccent(safeGet(localStorage, "hk_accent") || "lavender");
+
+/* =========================================================
+   J. 시작
+   ========================================================= */
+renderList();
+if (getKey()) loadModels().catch(() => {});
+else setTimeout(() => openKeySheet(), 600);
+</script>
+</body>
+</html>
